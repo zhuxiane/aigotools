@@ -8,6 +8,7 @@ RUN apk add --no-cache libc6-compat \
   && npm config set strict-ssl false \
   && npm config set fetch-retries 10 \
   && corepack enable pnpm \
+  && pnpm config set registry https://registry.npmmirror.com \
   && pnpm i \
   && mv next.config.docker.js next.config.js \
   && pnpm run build

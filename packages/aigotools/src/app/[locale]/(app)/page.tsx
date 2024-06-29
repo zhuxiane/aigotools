@@ -19,7 +19,7 @@ export default async function Page() {
         <Hero />
         <Search />
         <SiteGroup id="featured" sites={featuredSites} title={t("featured")} />
-        <SiteGroup id="latest" sites={latestSites} title={t("latest")} />
+        {/* <SiteGroup id="latest" sites={latestSites} title={t("latest")} /> */}
       </Container>
     </>
   );

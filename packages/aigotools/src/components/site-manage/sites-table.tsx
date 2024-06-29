@@ -26,12 +26,17 @@ import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import { debounce } from "lodash";
 import { Atom, Axe, Plus, SearchIcon, StopCircle } from "lucide-react";
+import {
+  Prisma,
+  ProcessStage,
+  SiteState,
+  Category,
+  Site,
+} from "@prisma/client";
 
 import SiteEdit from "./site-edit";
 import SiteOperation from "./site-operation";
 
-import { ProcessStage, SiteState } from "@/lib/constants";
-import { Site } from "@/models/site";
 import {
   SearchParams,
   dispatchAllSitesCrawl,
@@ -47,7 +52,9 @@ import { createTemplateSite } from "@/lib/create-template-site";
 export default function SitesTable() {
   const t = useTranslations("siteManage");
 
-  const [site, setSite] = useState<Site | undefined>(undefined);
+  const [site, setSite] = useState<Prisma.SiteCreateInput | undefined>(
+    undefined,
+  );
   const [searchParams, setSearchParams] = useState<SearchParams>({
     page: 1,
     size: 15,
@@ -77,7 +84,7 @@ export default function SitesTable() {
 
       return false;
     },
-    refetchInterval: 5000,
+    // refetchInterval: 5000,
     placeholderData: (pdata) => {
       console.log(pdata);
 
@@ -93,11 +100,12 @@ export default function SitesTable() {
         size: 999,
         type: "second",
       });
-
+      console.log(res);
       return res.categories;
     },
     initialData: [],
   });
+  console.log(categories);
 
   const stopAllSite = useCallback(async () => {
     toast.promise(
@@ -121,7 +129,7 @@ export default function SitesTable() {
         pending: t("processing"),
         success: t("success"),
         error: t("fail"),
-      }
+      },
     );
   }, [handleSearch, searchParams, t]);
 
@@ -147,7 +155,7 @@ export default function SitesTable() {
         pending: t("processing"),
         success: t("success"),
         error: t("fail"),
-      }
+      },
     );
   }, [handleSearch, searchParams, t]);
 
@@ -195,8 +203,8 @@ export default function SitesTable() {
             })
           }
         >
-          {categories.map((category) => (
-            <SelectItem key={category._id}>
+          {categories.map((category: Category) => (
+            <SelectItem key={category.id}>
               {`${category.icon || ""} ${category.name}`.trim()}
             </SelectItem>
           ))}
@@ -255,7 +263,7 @@ export default function SitesTable() {
             1000,
             {
               maxWait: 5000,
-            }
+            },
           )}
         />
       </div>
@@ -278,8 +286,8 @@ export default function SitesTable() {
               </div>
             }
           >
-            {searchResult.sites.map((site, index) => (
-              <TableRow key={site._id}>
+            {searchResult.sites.map((site: Site, index) => (
+              <TableRow key={site.id}>
                 <TableCell width={50}>{index + 1}</TableCell>
                 <TableCell>
                   <Link
@@ -307,7 +315,7 @@ export default function SitesTable() {
                       {
                         "bg-primary-500 opacity-80":
                           site.state !== SiteState.published,
-                      }
+                      },
                     )}
                   >
                     {t(site.state)}
@@ -324,7 +332,7 @@ export default function SitesTable() {
                           site.processStage === ProcessStage.processing,
                         "bg-primary-500 opacity-80":
                           site.processStage === ProcessStage.pending,
-                      }
+                      },
                     )}
                   >
                     {site.processStage === ProcessStage.processing && (

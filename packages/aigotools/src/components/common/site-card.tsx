@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { Image } from "@nextui-org/react";
 import { ExternalLink, ThumbsUpIcon } from "lucide-react";
 
-import { Site } from "@/models/site";
+import { Site } from "@prisma/client";
 import { useRouter } from "@/navigation";
 
 export default function SiteCard({ site }: { site: Site }) {
@@ -11,7 +11,7 @@ export default function SiteCard({ site }: { site: Site }) {
 
   return (
     <div
-      key={site._id as string}
+      key={site.id as string}
       className="group w-full shadow-medium hover:shadow-large transition-all bg-primary-100 rounded-md overflow-hidden cursor-pointer"
       onClick={() => {
         router.push(`/s/${site.siteKey}`);
@@ -19,7 +19,7 @@ export default function SiteCard({ site }: { site: Site }) {
     >
       <Image
         isZoomed
-        alt={site.name}
+        alt={site.name || undefined}
         classNames={{
           wrapper: "w-full !max-w-full",
           img: "w-full aspect-video object-fill",

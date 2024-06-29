@@ -17,10 +17,10 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
+import { Prisma } from "@prisma/client";
 
 import LinksInput from "./links-input";
 
-import { Site } from "@/models/site";
 import ArrowInput from "@/components/common/arrow-input";
 import SingleImageUpload from "@/components/common/single-image-upload";
 import { managerSearchCategories, saveSite } from "@/lib/actions";
@@ -29,17 +29,18 @@ export default function SiteEdit({
   site,
   onClose,
 }: {
-  site?: Site;
+  site?: Prisma.SiteCreateInput;
   onClose: () => void;
 }) {
   const { register, getValues, setValue, watch, reset, trigger, formState } =
-    useForm<Site>({
+    useForm<Prisma.SiteCreateInput>({
       defaultValues: site,
     });
 
   const t = useTranslations("siteEdit");
 
   const formValues = watch();
+  console.log(formValues);
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -100,9 +101,7 @@ export default function SiteEdit({
       }}
     >
       <ModalContent>
-        <ModalHeader>
-          {site?._id ? t("updateTitle") : t("newTitle")}
-        </ModalHeader>
+        <ModalHeader>{site?.id ? t("updateTitle") : t("newTitle")}</ModalHeader>
         <ModalBody>
           <form className="grid grid-cols-2 gap-4 max-h-[65vh] pb-1 overflow-auto">
             <Input
@@ -151,13 +150,13 @@ export default function SiteEdit({
               onSelectionChange={(value) => {
                 setValue(
                   "categories",
-                  Array.from(value).map((item) => item.toString())
+                  Array.from(value).map((item) => item.toString()),
                 );
               }}
             >
               {categories.map((category) => {
                 return (
-                  <SelectItem key={category._id}>{category.name}</SelectItem>
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
                 );
               })}
             </Select>

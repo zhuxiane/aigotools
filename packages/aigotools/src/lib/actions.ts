@@ -3,33 +3,38 @@ import { currentUser } from "@clerk/nextjs/server";
 import { FilterQuery } from "mongoose";
 import axios from "axios";
 
-import { createTemplateSite } from "./create-template-site";
-import { ProcessStage, ReviewState, SiteState } from "./constants";
+// import { ProcessStage, ReviewState, SiteState } from "./constants";
+import {
+  Prisma,
+  SiteState,
+  ProcessStage,
+  Category,
+  Site,
+} from "@prisma/client";
+
 import { AppConfig } from "./config";
+import prisma from "./prisma";
 
 import dbConnect from "@/lib/db-connect";
-import { Site, SiteDocument, SiteModel } from "@/models/site";
 import { Review, ReviewDocument, ReviewModel } from "@/models/review";
-import { UpvoteModel, UpvoteType } from "@/models/upvote";
-import { Category, CategoryDocument, CategoryModel } from "@/models/category";
 
-function siteToObject(site: SiteDocument) {
-  const siteObj = site.toObject();
+// function siteToObject(site: SiteDocument) {
+//   const siteObj = site.toObject();
 
-  siteObj._id = siteObj._id.toString();
+//   siteObj._id = siteObj._id.toString();
 
-  delete siteObj.__v;
+//   delete siteObj.__v;
 
-  return siteObj as Site;
-}
+//   return siteObj as Site;
+// }
 
-function pickCategoryName(site: Site) {
-  site.categories = site.categories.map(
-    (cate) => (cate as unknown as Category).name
-  );
+// function pickCategoryName(site: Site) {
+//   return site.categories.map(
+//     (cate) => (cate as unknown as Category).name
+//   );
 
-  return site;
-}
+//   return site;
+// }
 
 function reviewToObject(review: ReviewDocument) {
   const reviewObj = review.toObject();
@@ -41,22 +46,23 @@ function reviewToObject(review: ReviewDocument) {
   return reviewObj as Review;
 }
 
-function categoryToObject(category: CategoryDocument) {
-  const categoryObj = category.toObject();
+// function categoryToObject(category: CategoryDocument) {
+//   const categoryObj = category.toObject();
 
-  categoryObj._id = categoryObj._id.toString();
+//   categoryObj._id = categoryObj._id.toString();
 
-  delete categoryObj.__v;
+//   delete categoryObj.__v;
 
-  if (categoryObj.parent) {
-    categoryObj.parent = categoryObj.parent.toString();
-  }
+//   if (categoryObj.parent) {
+//     categoryObj.parent = categoryObj.parent.toString();
+//   }
 
-  return categoryObj as Category;
-}
+//   return categoryObj as Category;
+// }
 
 async function assertIsManager() {
   const user = await currentUser();
+
   const isManager = user?.id && AppConfig.manageUsers.includes(user.id);
 
   if (!isManager) {
@@ -66,79 +72,79 @@ async function assertIsManager() {
   return user;
 }
 
-export async function searchSites({
-  search,
-  page,
-  category,
-}: {
-  search: string;
-  category: string;
-  page: number;
-}) {
-  try {
-    await dbConnect();
+// export async function searchSites({
+//   search,
+//   page,
+//   category,
+// }: {
+//   search: string;
+//   category: string;
+//   page: number;
+// }) {
+//   try {
+//     await dbConnect();
 
-    const pageSize = 24;
+//     const pageSize = 24;
 
-    const query: FilterQuery<SiteDocument> = {
-      state: SiteState.published,
-    };
+//     const query: FilterQuery<SiteDocument> = {
+//       state: SiteState.published,
+//     };
 
-    if (search) {
-      query.$text = { $search: search };
-    }
+//     if (search) {
+//       query.$text = { $search: search };
+//     }
 
-    if (category) {
-      query.categories = (await CategoryModel.findOne({ name: category }))?._id;
-    }
+//     if (category) {
+//       query.categories = (await CategoryModel.findOne({ name: category }))?._id;
+//     }
 
-    const regFindSites = search
-      ? await SiteModel.find({
-          $or: [
-            { name: { $regex: search, $options: "i" } },
-            { siteKey: { $regex: search, $options: "i" } },
-          ],
-          state: SiteState.published,
-        })
-          .sort({ weight: -1, updatedAt: -1 })
-          .limit(12)
-      : [];
+//     const regFindSites = search
+//       ? await SiteModel.find({
+//           $or: [
+//             { name: { $regex: search, $options: "i" } },
+//             { siteKey: { $regex: search, $options: "i" } },
+//           ],
+//           state: SiteState.published,
+//         })
+//           .sort({ weight: -1, updatedAt: -1 })
+//           .limit(12)
+//       : [];
 
-    query._id = { $nin: [] };
+//     query._id = { $nin: [] };
 
-    const baseFindTask = search
-      ? SiteModel.find(query, { score: { $meta: "textScore" } }).sort({
-          score: { $meta: "textScore" },
-        })
-      : SiteModel.find(query).sort({
-          weight: -1,
-          updatedAt: -1,
-        });
+//     const baseFindTask = search
+//       ? SiteModel.find(query, { score: { $meta: "textScore" } }).sort({
+//           score: { $meta: "textScore" },
+//         })
+//       : SiteModel.find(query).sort({
+//           weight: -1,
+//           updatedAt: -1,
+//         });
 
-    const findTask = baseFindTask
-      .skip((page - 1) * pageSize)
-      .limit(pageSize)
-      .populate("categories");
+//     const findTask = baseFindTask
+//       .skip((page - 1) * pageSize)
+//       .limit(pageSize)
+//       .populate("categories");
 
-    const countTask = SiteModel.countDocuments(query);
+//     const countTask = SiteModel.countDocuments(query);
 
-    const [sites, count] = await Promise.all([findTask, countTask]);
+//     const [sites, count] = await Promise.all([findTask, countTask]);
 
-    console.log({ query, sites, count });
+//     console.log({ query, sites, count });
 
-    return {
-      page,
-      sites: [...(page === 1 ? regFindSites : []), ...sites]
-        .map(siteToObject)
-        .map(pickCategoryName),
-      hasNext: count > page * pageSize,
-    };
-  } catch (error) {
-    console.log("Search sites error", error);
+//     return {
+//       page,
+//       sites: [...(page === 1 ? regFindSites : []), ...sites]
+//         .map(siteToObject)
+//         .map(pickCategoryName),
+//       hasNext: count > page * pageSize,
+//     };
+//   } catch (error) {
+//     console.log("Search sites error", error);
 
-    throw error;
-  }
-}
+//     throw error;
+//   }
+// }
 
 export interface SearchParams {
   state?: SiteState;
@@ -149,11 +155,33 @@ export interface SearchParams {
   size: number;
 }
 
+// function generateSiteFilterQuery(data: SearchParams) {
+//   const query: FilterQuery<SiteDocument> = {};
+
+//   if (data.search) {
+//     query.$text = { $search: data.search };
+//   }
+//   if (data.state) {
+//     query.state = data.state;
+//   }
+//   if (data.processStage) {
+//     query.processStage = data.processStage;
+//   }
+
+//   if (data.category) {
+//     query.categories = data.category;
+//   }
+
+//   return query;
+// }
 function generateSiteFilterQuery(data: SearchParams) {
-  const query: FilterQuery<SiteDocument> = {};
+  const query: any = {}; // Adjust the type as needed
 
   if (data.search) {
-    query.$text = { $search: data.search };
+    query.OR = [
+      { name: { contains: data.search, mode: "insensitive" } },
+      { desceription: { contains: data.search, mode: "insensitive" } },
+    ];
   }
   if (data.state) {
     query.state = data.state;
@@ -163,7 +191,7 @@ function generateSiteFilterQuery(data: SearchParams) {
   }
 
   if (data.category) {
-    query.categories = data.category;
+    query.categories = { some: { id: data.category } };
   }
 
   return query;
@@ -173,27 +201,51 @@ export async function managerSearchSites(data: SearchParams) {
   try {
     await assertIsManager();
 
-    await dbConnect();
+    // await dbConnect();
 
     const query = generateSiteFilterQuery(data);
 
-    const [sites, count] = await Promise.all([
-      SiteModel.find(query)
-        .sort({ updatedAt: -1 })
-        .skip((data.page - 1) * data.size)
-        .limit(data.size),
-      SiteModel.countDocuments(query),
+    console.log(query);
+    const [sites, count] = await prisma.$transaction([
+      prisma.site.findMany({
+        where: query,
+        orderBy: { updatedAt: "desc" },
+        skip: (data.page - 1) * data.size,
+        take: data.size,
+        include: { categories: true },
+      }),
+      prisma.site.count({
+        where: query,
+      }),
     ]);
 
-    return {
-      sites: sites.map(siteToObject).map((site) => {
-        site.categories = site.categories.map((c) => c.toString());
+    console.log(sites);
 
-        return site;
-      }),
+    return {
+      sites: sites.map((site) => ({
+        ...site,
+        categories: site.categories.map((category) => category.name),
+      })),
       count,
       totalPage: Math.ceil(count / data.size),
     };
+    // const [sites, count] = await Promise.all([
+    //   SiteModel.find(query)
+    //     .sort({ updatedAt: -1 })
+    //     .skip((data.page - 1) * data.size)
+    //     .limit(data.size),
+    //   SiteModel.countDocuments(query),
+    // ]);
+
+    // return {
+    //   sites: sites.map(siteToObject).map((site) => {
+    //     site.categories = site.categories.map((c) => c.toString());
+
+    //     return site;
+    //   }),
+    //   count,
+    //   totalPage: Math.ceil(count / data.size),
+    // };
   } catch (error) {
     console.log("Search sites error", error);
 
@@ -203,17 +255,34 @@ export async function managerSearchSites(data: SearchParams) {
 
 export async function getFeaturedSites(size = 12) {
   try {
-    await dbConnect();
+    const sites = await prisma.site.findMany({
+      where: {
+        featured: true,
+        state: SiteState.published,
+      },
+      include: {
+        categories: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: [{ weight: "desc" }, { updatedAt: "desc" }],
+    });
 
-    const sites = await SiteModel.find({
-      featured: true,
-      state: SiteState.published,
-    })
-      .sort({ weight: -1, updatedAt: -1 })
-      .limit(size)
-      .populate("categories");
+    return sites;
 
-    return sites.map(siteToObject).map(pickCategoryName);
+    // await dbConnect();
+
+    // const sites = await SiteModel.find({
+    //   featured: true,
+    //   state: SiteState.published,
+    // })
+    //   .sort({ weight: -1, updatedAt: -1 })
+    //   .limit(size)
+    //   .populate("categories");
+
+    // return sites.map(siteToObject).map(pickCategoryName);
   } catch (error) {
     console.log("Get featured sites", error);
 
@@ -223,16 +292,14 @@ export async function getFeaturedSites(size = 12) {
 
 export async function getLatestSites(size = 12) {
   try {
-    await dbConnect();
-
-    const sites = await SiteModel.find({
-      state: SiteState.published,
-    })
-      .sort({ updatedAt: -1 })
-      .limit(size)
-      .populate("categories");
-
-    return sites.map(siteToObject).map(pickCategoryName);
+    // await dbConnect();
+    // const sites = await SiteModel.find({
+    //   state: SiteState.published,
+    // })
+    //   .sort({ updatedAt: -1 })
+    //   .limit(size)
+    //   .populate("categories");
+    // return sites.map(siteToObject).map(pickCategoryName);
   } catch (error) {
     console.log("Get latest sites", error);
 
@@ -264,165 +331,198 @@ export async function submitReview(name: string, url: string) {
   return false;
 }
 
-export async function getSiteMetadata(siteKey: string) {
-  try {
-    await dbConnect();
+// export async function getSiteMetadata(siteKey: string) {
+//   try {
+//     await dbConnect();
 
-    const site = await SiteModel.findOne({
-      siteKey,
-      state: SiteState.published,
-    });
+//     const site = await SiteModel.findOne({
+//       siteKey,
+//       state: SiteState.published,
+//     });
 
-    if (!site) {
-      return null;
-    }
+//     if (!site) {
+//       return null;
+//     }
 
-    return {
-      title: site.name,
-      description: site.metaDesceription || site.desceription,
-      keywords: site.metaKeywords,
-    };
-  } catch (error) {
-    console.log("Get site metadata error", error);
-  }
+//     return {
+//       title: site.name,
+//       description: site.metaDesceription || site.desceription,
+//       keywords: site.metaKeywords,
+//     };
+//   } catch (error) {
+//     console.log("Get site metadata error", error);
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
-export async function getSiteDetailByKey(siteKey: string) {
-  try {
-    await dbConnect();
+// export async function getSiteDetailByKey(siteKey: string) {
+//   try {
+//     await dbConnect();
 
-    const site = await SiteModel.findOne({
-      siteKey,
-      state: SiteState.published,
-    }).populate("categories");
+//     const site = await SiteModel.findOne({
+//       siteKey,
+//       state: SiteState.published,
+//     }).populate("categories");
 
-    if (!site) {
-      return null;
-    }
+//     if (!site) {
+//       return null;
+//     }
 
-    const suggests = await SiteModel.find(
-      {
-        $text: { $search: site.desceription },
-        _id: { $ne: site._id },
-        state: SiteState.published,
-      },
-      { score: { $meta: "textScore" } }
-    )
-      .sort({ score: { $meta: "textScore" } })
-      .limit(12)
-      .populate("categories");
+//     const suggests = await SiteModel.find(
+//       {
+//         $text: { $search: site.desceription },
+//         _id: { $ne: site._id },
+//         state: SiteState.published,
+//       },
+//       { score: { $meta: "textScore" } }
+//     )
+//       .sort({ score: { $meta: "textScore" } })
+//       .limit(12)
+//       .populate("categories");
 
-    return {
-      site: pickCategoryName(siteToObject(site)),
-      suggests: suggests.map(siteToObject).map(pickCategoryName),
-    };
-  } catch (error) {
-    console.log("Get site detail error", error);
-  }
+//     return {
+//       site: pickCategoryName(siteToObject(site)),
+//       suggests: suggests.map(siteToObject).map(pickCategoryName),
+//     };
+//   } catch (error) {
+//     console.log("Get site detail error", error);
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
-export async function triggerUpvoteSite(siteId: string) {
-  try {
-    const user = await currentUser();
+// export async function triggerUpvoteSite(siteId: string) {
+//   try {
+//     const user = await currentUser();
 
-    if (!user) {
-      throw new Error("User not signed");
-    }
-    await dbConnect();
+//     if (!user) {
+//       throw new Error("User not signed");
+//     }
+//     await dbConnect();
 
-    const site = await SiteModel.findOne({
-      _id: siteId,
-      state: SiteState.published,
-    });
+//     const site = await SiteModel.findOne({
+//       _id: siteId,
+//       state: SiteState.published,
+//     });
 
-    if (!site) {
-      throw new Error("Site is null");
-    }
+//     if (!site) {
+//       throw new Error("Site is null");
+//     }
 
-    const upvoted = await UpvoteModel.exists({
-      userId: user.id,
-      targetId: siteId,
-      upvoteType: UpvoteType.site,
-    });
+//     const upvoted = await UpvoteModel.exists({
+//       userId: user.id,
+//       targetId: siteId,
+//       upvoteType: UpvoteType.site,
+//     });
 
-    if (upvoted) {
-      await UpvoteModel.findByIdAndDelete(upvoted._id);
-    } else {
-      await UpvoteModel.create({
-        userId: user.id,
-        targetId: siteId,
-        upvoteType: UpvoteType.site,
-      });
-    }
-    site.voteCount = await UpvoteModel.countDocuments({
-      targetId: siteId,
-      upvoteType: UpvoteType.site,
-    });
-    await site.save();
+//     if (upvoted) {
+//       await UpvoteModel.findByIdAndDelete(upvoted._id);
+//     } else {
+//       await UpvoteModel.create({
+//         userId: user.id,
+//         targetId: siteId,
+//         upvoteType: UpvoteType.site,
+//       });
+//     }
+//     site.voteCount = await UpvoteModel.countDocuments({
+//       targetId: siteId,
+//       upvoteType: UpvoteType.site,
+//     });
+//     await site.save();
 
-    return { upvoted: !upvoted, count: site.voteCount };
-  } catch (error) {
-    console.log("Upvote site error", error);
-    throw error;
-  }
-}
+//     return { upvoted: !upvoted, count: site.voteCount };
+//   } catch (error) {
+//     console.log("Upvote site error", error);
+//     throw error;
+//   }
+// }
 
-export async function isUserUpVoteSite(siteId: string) {
-  try {
-    const user = await currentUser();
+// export async function isUserUpVoteSite(siteId: string) {
+//   try {
+//     const user = await currentUser();
 
-    if (!user) {
-      throw new Error("Not signed");
-    }
-    await dbConnect();
+//     if (!user) {
+//       throw new Error("Not signed");
+//     }
+//     await dbConnect();
 
-    const existed = await UpvoteModel.exists({
-      targetId: siteId,
-      userId: user.id,
-      upvoteType: UpvoteType.site,
-    });
+//     const existed = await UpvoteModel.exists({
+//       targetId: siteId,
+//       userId: user.id,
+//       upvoteType: UpvoteType.site,
+//     });
 
-    return !!existed;
-  } catch (error) {
-    console.log("Is user upvote site error", error);
-  }
+//     return !!existed;
+//   } catch (error) {
+//     console.log("Is user upvote site error", error);
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
-export async function saveSite(site: Site) {
+export async function saveSite(site: Prisma.SiteCreateInput) {
   try {
     const user = await assertIsManager();
-
-    await dbConnect();
-
     const urlObj = new URL(site.url);
 
-    site.url = urlObj.origin;
-    site.updatedAt = Date.now();
-    site.siteKey = urlObj.hostname.replace(/[^\w]/g, "_");
+    const updateData = {
+      ...site,
+      url: urlObj.origin,
+      updatedAt: new Date(),
+      siteKey: urlObj.hostname.replace(/[^\w]/g, "_"),
+    };
 
-    let saved: SiteDocument;
+    let savedSite;
 
-    if (site._id) {
-      saved = (await SiteModel.findByIdAndUpdate(
-        site._id,
-        { $set: site },
-        { returnDocument: "after" }
-      )) as any;
+    if (site.id) {
+      // 如果有id，更新站点信息
+      savedSite = await prisma.site.update({
+        where: { id: site.id },
+        data: updateData,
+      });
     } else {
-      site.userId = user.id;
+      // 如果没有id，创建新站点
+      updateData.userId = user.id;
 
-      saved = await SiteModel.create(site);
+      savedSite = await prisma.site.create({
+        data: updateData,
+      });
     }
 
-    saved.categories = saved.categories.map((c) => c.toString());
+    // 映射 categories 为字符串数组
+    // const categories = savedSite.categories.map((c: { id: string }) => c.id);
 
-    return siteToObject(saved);
+    return {
+      ...savedSite,
+      // categories,
+    };
+
+    // await dbConnect();
+
+    // const urlObj = new URL(site.url);
+
+    // site.url = urlObj.origin;
+    // site.updatedAt = Date.now();
+    // site.siteKey = urlObj.hostname.replace(/[^\w]/g, "_");
+
+    // let saved: SiteDocument;
+
+    // if (site._id) {
+    //   saved = (await SiteModel.findByIdAndUpdate(
+    //     site._id,
+    //     { $set: site },
+    //     { returnDocument: "after" },
+    //   )) as any;
+    // } else {
+    //   site.userId = user.id;
+
+    //   saved = await SiteModel.create(site);
+    // }
+
+    // saved.categories = saved.categories.map((c) => c.toString());
+
+    // return siteToObject(saved);
   } catch (error) {
     console.log("Save site error", error);
   }
@@ -434,17 +534,28 @@ export async function triggerSitePublish(site: Site) {
   try {
     await assertIsManager();
 
-    await dbConnect();
+    const newState =
+      site.state === SiteState.published
+        ? SiteState.unpublished
+        : SiteState.published;
 
-    if (site.state === SiteState.published) {
-      await SiteModel.findByIdAndUpdate(site._id, {
-        $set: { state: SiteState.unpublished, updatedAt: Date.now() },
-      });
-    } else {
-      await SiteModel.findByIdAndUpdate(site._id, {
-        $set: { state: SiteState.published, updatedAt: Date.now() },
-      });
-    }
+    await prisma.site.update({
+      where: { id: site.id },
+      data: {
+        state: newState,
+      },
+    });
+    // await dbConnect();
+
+    // if (site.state === SiteState.published) {
+    //   await SiteModel.findByIdAndUpdate(site._id, {
+    //     $set: { state: SiteState.unpublished, updatedAt: Date.now() },
+    //   });
+    // } else {
+    //   await SiteModel.findByIdAndUpdate(site._id, {
+    //     $set: { state: SiteState.published, updatedAt: Date.now() },
+    //   });
+    // }
 
     return true;
   } catch (error) {
@@ -454,98 +565,103 @@ export async function triggerSitePublish(site: Site) {
   return false;
 }
 
-export async function managerSearchReviews(data: {
-  page: number;
-  size: number;
-  search?: string;
-  state?: ReviewState;
-}) {
-  try {
-    await assertIsManager();
+// export async function managerSearchReviews(data: {
+//   page: number;
+//   size: number;
+//   search?: string;
+//   state?: ReviewState;
+// }) {
+//   try {
+//     await assertIsManager();
 
-    await dbConnect();
+//     await dbConnect();
 
-    const query: FilterQuery<SiteDocument> = {};
+//     const query: FilterQuery<SiteDocument> = {};
 
-    if (data.search) {
-      query.$text = { $search: data.search };
-    }
-    if (data.state) {
-      query.state = data.state;
-    }
+//     if (data.search) {
+//       query.$text = { $search: data.search };
+//     }
+//     if (data.state) {
+//       query.state = data.state;
+//     }
 
-    const [reviews, count] = await Promise.all([
-      ReviewModel.find(query)
-        .sort({ updatedAt: -1 })
-        .skip((data.page - 1) * data.size)
-        .limit(data.size),
-      ReviewModel.countDocuments(query),
-    ]);
+//     const [reviews, count] = await Promise.all([
+//       ReviewModel.find(query)
+//         .sort({ updatedAt: -1 })
+//         .skip((data.page - 1) * data.size)
+//         .limit(data.size),
+//       ReviewModel.countDocuments(query),
+//     ]);
 
-    return {
-      reviews: reviews.map(reviewToObject),
-      count,
-      totalPage: Math.ceil(count / data.size),
-    };
-  } catch (error) {
-    console.log("Search reviews error", error);
+//     return {
+//       reviews: reviews.map(reviewToObject),
+//       count,
+//       totalPage: Math.ceil(count / data.size),
+//     };
+//   } catch (error) {
+//     console.log("Search reviews error", error);
 
-    // throw error;
-    return {
-      reviews: [],
-      count: 0,
-      totalPage: 0,
-    };
-  }
-}
+//     // throw error;
+//     return {
+//       reviews: [],
+//       count: 0,
+//       totalPage: 0,
+//     };
+//   }
+// }
 
 export async function deleteSite(siteId: string) {
   try {
     await assertIsManager();
 
-    await SiteModel.findByIdAndDelete(siteId);
+    // await SiteModel.findByIdAndDelete(siteId);
+    await prisma.site.delete({
+      where: {
+        id: siteId,
+      },
+    });
   } catch (error) {
     console.log("Delete site error", error);
     throw error;
   }
 }
 
-export async function updateReviewState(reviewId: string, state: ReviewState) {
-  try {
-    const user = await assertIsManager();
+// export async function updateReviewState(reviewId: string, state: ReviewState) {
+//   try {
+//     const user = await assertIsManager();
 
-    await dbConnect();
+//     await dbConnect();
 
-    const review = await ReviewModel.findById(reviewId);
+//     const review = await ReviewModel.findById(reviewId);
 
-    if (!review) {
-      throw new Error("Review not exist");
-    }
+//     if (!review) {
+//       throw new Error("Review not exist");
+//     }
 
-    if (state === ReviewState.approved) {
-      const site = await saveSite(
-        createTemplateSite({
-          userId: user.id,
-          name: review.name,
-          url: review.url,
-        })
-      );
+//     if (state === ReviewState.approved) {
+//       const site = await saveSite(
+//         createTemplateSite({
+//           userId: user.id,
+//           name: review.name,
+//           url: review.url,
+//         })
+//       );
 
-      if (site) {
-        await dispatchSiteCrawl(site._id.toString());
-      } else {
-        throw new Error("Save site error");
-      }
-    }
+//       if (site) {
+//         await dispatchSiteCrawl(site._id.toString());
+//       } else {
+//         throw new Error("Save site error");
+//       }
+//     }
 
-    review.state = state;
-    review.updatedAt = Date.now();
-    await review.save();
-  } catch (error) {
-    console.log("Update review state error", error);
-    throw error;
-  }
-}
+//     review.state = state;
+//     review.updatedAt = Date.now();
+//     await review.save();
+//   } catch (error) {
+//     console.log("Update review state error", error);
+//     throw error;
+//   }
+// }
 
 export async function dispatchSiteCrawl(siteId: string) {
   try {
@@ -558,7 +674,7 @@ export async function dispatchSiteCrawl(siteId: string) {
         headers: {
           Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
         },
-      }
+      },
     );
   } catch (error) {
     console.log("Dispatch site crawl error", error);
@@ -577,7 +693,7 @@ export async function stopSiteCrawl(siteId: string) {
         headers: {
           Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
         },
-      }
+      },
     );
   } catch (error) {
     console.log("Stop site crawl error", error);
@@ -586,7 +702,7 @@ export async function stopSiteCrawl(siteId: string) {
 }
 
 export async function dispatchAllSitesCrawl(
-  data: Omit<SearchParams, "page" | "size">
+  data: Omit<SearchParams, "page" | "size">,
 ) {
   try {
     await assertIsManager();
@@ -598,7 +714,7 @@ export async function dispatchAllSitesCrawl(
         headers: {
           Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
         },
-      }
+      },
     );
   } catch (error) {
     console.log("Dispatch site crawl error", error);
@@ -607,7 +723,7 @@ export async function dispatchAllSitesCrawl(
 }
 
 export async function stopAllSitesCrawl(
-  data: Omit<SearchParams, "page" | "size">
+  data: Omit<SearchParams, "page" | "size">,
 ) {
   try {
     await assertIsManager();
@@ -619,52 +735,52 @@ export async function stopAllSitesCrawl(
         headers: {
           Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
         },
-      }
-    );
-  } catch (error) {
-    console.log("Dispatch site crawl error", error);
-    throw error;
-  }
-}
-
-/** Category */
-export async function saveCategory(category: Category) {
-  try {
-    await assertIsManager();
-    await dbConnect();
-
-    if (category._id) {
-      category.updatedAt = Date.now();
-      await CategoryModel.findByIdAndUpdate(category._id, { $set: category });
-    } else {
-      await CategoryModel.create(category);
-    }
-  } catch (error) {
-    console.log("Dispatch site crawl error", error);
-    throw error;
-  }
-}
-
-export async function deleteCategory(id: string) {
-  try {
-    await assertIsManager();
-    await dbConnect();
-
-    await CategoryModel.findByIdAndDelete(id);
-    await SiteModel.updateMany(
-      {
-        categories: id,
       },
-      {
-        $pull: { categories: id },
-      }
     );
-    await CategoryModel.deleteMany({ parent: id });
   } catch (error) {
     console.log("Dispatch site crawl error", error);
     throw error;
   }
 }
+
+// /** Category */
+// export async function saveCategory(category: Category) {
+//   try {
+//     await assertIsManager();
+//     await dbConnect();
+
+//     if (category._id) {
+//       category.updatedAt = Date.now();
+//       await CategoryModel.findByIdAndUpdate(category._id, { $set: category });
+//     } else {
+//       await CategoryModel.create(category);
+//     }
+//   } catch (error) {
+//     console.log("Dispatch site crawl error", error);
+//     throw error;
+//   }
+// }
+
+// export async function deleteCategory(id: string) {
+//   try {
+//     await assertIsManager();
+//     await dbConnect();
+
+//     await CategoryModel.findByIdAndDelete(id);
+//     await SiteModel.updateMany(
+//       {
+//         categories: id,
+//       },
+//       {
+//         $pull: { categories: id },
+//       }
+//     );
+//     await CategoryModel.deleteMany({ parent: id });
+//   } catch (error) {
+//     console.log("Dispatch site crawl error", error);
+//     throw error;
+//   }
+// }
 
 export interface CategorySearchForm {
   page: number;
@@ -678,35 +794,65 @@ export async function managerSearchCategories(data: CategorySearchForm) {
   try {
     await assertIsManager();
 
-    await dbConnect();
+    // await dbConnect();
 
     const query: FilterQuery<Category> = {};
 
     if (data.search) {
-      query.name = { $regex: data.search, $options: "i" };
+      query.name = { contains: data.search, mode: "insensitive" };
     }
     if (data.parent) {
-      query.parent = data.parent;
+      query.parentId = data.parent;
     }
     if (data.type === "top") {
-      query.parent = null;
-    } else if (data.type == "second" && !data.parent) {
-      query.parent = { $exists: true };
+      query.parentId = null;
+    } else if (data.type === "second" && !data.parent) {
+      query.parentId = { not: null };
     }
 
-    const [categories, count] = await Promise.all([
-      CategoryModel.find(query)
-        .sort({ updatedAt: -1 })
-        .skip((data.page - 1) * data.size)
-        .limit(data.size),
-      CategoryModel.countDocuments(query),
+    const [categories, count] = await prisma.$transaction([
+      prisma.category.findMany({
+        where: query,
+        orderBy: { updatedAt: "desc" },
+        skip: (data.page - 1) * data.size,
+        take: data.size,
+      }),
+      prisma.category.count({
+        where: query,
+      }),
     ]);
 
     return {
-      categories: categories.map(categoryToObject),
+      categories,
       count,
       totalPage: Math.ceil(count / data.size),
     };
+
+    // if (data.search) {
+    //   query.name = { $regex: data.search, $options: "i" };
+    // }
+    // if (data.parent) {
+    //   query.parent = data.parent;
+    // }
+    // if (data.type === "top") {
+    //   query.parent = null;
+    // } else if (data.type == "second" && !data.parent) {
+    //   query.parent = { $exists: true };
+    // }
+
+    // const [categories, count] = await Promise.all([
+    //   CategoryModel.find(query)
+    //     .sort({ updatedAt: -1 })
+    //     .skip((data.page - 1) * data.size)
+    //     .limit(data.size),
+    //   CategoryModel.countDocuments(query),
+    // ]);
+
+    // return {
+    //   categories: categories.map(categoryToObject),
+    //   count,
+    //   totalPage: Math.ceil(count / data.size),
+    // };
   } catch (error) {
     console.log("Search categories error", error);
 
@@ -716,14 +862,23 @@ export async function managerSearchCategories(data: CategorySearchForm) {
 
 export async function getFeaturedCategories() {
   try {
-    await dbConnect();
+    // await dbConnect();
 
-    const categories = await CategoryModel.find({
-      featured: true,
-      parent: { $exists: true },
-    }).sort({ weight: -1, updatedAt: -1 });
+    // const categories = await CategoryModel.find({
+    //   featured: true,
+    //   parent: { $exists: true },
+    // }).sort({ weight: -1, updatedAt: -1 });
 
-    return categories.map(categoryToObject);
+    // return categories.map(categoryToObject);
+    const categories = await prisma.category.findMany({
+      where: {
+        featured: true,
+        parentId: { not: null },
+      },
+      orderBy: [{ weight: "desc" }, { updatedAt: "desc" }],
+    });
+
+    return categories;
   } catch (error) {
     console.log("Get featured categories", error);
 
@@ -731,34 +886,34 @@ export async function getFeaturedCategories() {
   }
 }
 
-export async function getAllCategories() {
-  try {
-    await dbConnect();
-    const categories = await CategoryModel.find({}).sort({
-      weight: 1,
-      name: 1,
-    });
+// export async function getAllCategories() {
+//   try {
+//     await dbConnect();
+//     const categories = await CategoryModel.find({}).sort({
+//       weight: 1,
+//       name: 1,
+//     });
 
-    const plainCategories = categories.map(categoryToObject);
+//     const plainCategories = categories.map(categoryToObject);
 
-    const topCategories = plainCategories.filter((cate) => !cate.parent);
-    const secondaryCategories = plainCategories.filter((cate) => !!cate.parent);
+//     const topCategories = plainCategories.filter((cate) => !cate.parent);
+//     const secondaryCategories = plainCategories.filter((cate) => !!cate.parent);
 
-    const grouped = topCategories.map((category) => {
-      (category as any).children = secondaryCategories.filter(
-        (sec) => sec.parent === category._id
-      );
+//     const grouped = topCategories.map((category) => {
+//       (category as any).children = secondaryCategories.filter(
+//         (sec) => sec.parent === category._id
+//       );
 
-      return category;
-    }) as Array<
-      Category & {
-        children: Array<Category>;
-      }
-    >;
+//       return category;
+//     }) as Array<
+//       Category & {
+//         children: Array<Category>;
+//       }
+//     >;
 
-    return grouped.filter((c) => c.children.length);
-  } catch (error) {
-    console.log("Get all cateogry error", error);
-    throw error;
-  }
-}
+//     return grouped.filter((c) => c.children.length);
+//   } catch (error) {
+//     console.log("Get all cateogry error", error);
+//     throw error;
+//   }
+// }

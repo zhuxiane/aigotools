@@ -8,7 +8,7 @@ export const AppConfig = {
   // clerk
   debugClerk: process.env.CLERK_DEBUG === "true",
   manageUsers: (process.env.NEXT_PUBLIC_MANAGER_USER?.split(",") || []).filter(
-    Boolean
+    Boolean,
   ),
 
   // mongo

@@ -1,7 +1,7 @@
 import { Istok_Web } from "next/font/google";
 import clsx from "clsx";
 
-import { Site } from "@/models/site";
+import { Site } from "@prisma/client";
 import Container from "@/components/common/container";
 
 import SiteCard from "./site-card";
@@ -31,7 +31,7 @@ export default function SiteGroup({
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
         {sites.map((site) => {
-          return <SiteCard key={site._id} site={site} />;
+          return <SiteCard key={site.id} site={site} />;
         })}
       </div>
     </Container>

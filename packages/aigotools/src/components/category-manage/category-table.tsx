@@ -27,7 +27,7 @@ import CategoryOperation from "./category-operation";
 import { CategorySearchForm, managerSearchCategories } from "@/lib/actions";
 import Loading from "@/components/common/loading";
 import EmptyImage from "@/components/search/empty-image";
-import { Category } from "@/models/category";
+import { Category } from "@prisma/client";
 import { createTemplateCategory } from "@/lib/create-template-category";
 
 export default function CategoryTable() {
@@ -156,7 +156,7 @@ export default function CategoryTable() {
             1000,
             {
               maxWait: 5000,
-            }
+            },
           )}
         />
       </div>

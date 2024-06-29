@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ReviewState {
+  pending
+  approved
+  rejected
+}
+
+enum SiteState {
+  published
+  unpublished
+}
+
+enum ProcessStage {
+  pending
+  processing
+  success
+  fail
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String     @id @default(uuid())
+  icon      String?
+  name      String     @unique
+  parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  parentId  String?    // 这里使用 parentId 字段来表示父类别的外键
+  children  Category[] @relation("CategoryToCategory") // 反向关系字段，表示当前类别的子类别列表
+  featured  Boolean    @default(false)
+  weight    Int        @default(0)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  sites     Site[]
+}
+
+model Site {
+  id                 String       @id @default(uuid())
+  userId             String       @default("00000000000000000")
+  siteKey            String       @unique
+  url                String
+  name               String?
+  featured           Boolean      @default(false)
+  weight             Int          @default(0)
+  snapshot           String       @default("")
+  desceription       String       @default("")
+  pricingType        String       @default("")
+  categories         Category[]
+  pricings           String[]
+  images             String[]
+  features           String[]
+  usecases           String[]
+  users              String[]
+  relatedSearchs     String[]
+  links              Link?
+  voteCount          Int          @default(0)
+  metaKeywords       String[]
+  metaDesceription   String       @default("")
+  searchSuggestWords String[]
+  state              SiteState    @default(unpublished)
+  processStage       ProcessStage @default(pending)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@map("sites")
+}
+
+model Link {
+  id      Int     @id @default(autoincrement())
+  site    Site    @relation(fields: [siteId], references: [id])
+  siteId  String  @unique
+}
+
+model Review {
+  id         String      @id @default(uuid())
+  name       String
+  url        String
+  userId     String
+  userEmail  String
+  state      ReviewState @default(pending)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("reviews")
+}
+
+model Upvote {
+  id         String    @id @default(uuid())
+  userId     String
+  targetId   String
+  upvoteType UpvoteType
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@map("upvotes")
+}
+
+enum UpvoteType {
+  site
+}

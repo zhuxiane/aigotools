@@ -1,9 +1,9 @@
-import { ProcessStage, SiteState } from "./constants";
+import { Prisma, ProcessStage, SiteState, Site } from "@prisma/client";
 
-import { Site } from "@/models/site";
-
-export const createTemplateSite = (site: Partial<Site> = {}) => {
-  const newSite: Omit<Site, "_id"> = {
+export const createTemplateSite = (
+  site: Partial<Prisma.SiteCreateInput> = {},
+): Prisma.SiteCreateInput => {
+  const newSite: Prisma.SiteCreateInput = {
     userId: "",
     url: "",
     siteKey: "",
@@ -26,10 +26,10 @@ export const createTemplateSite = (site: Partial<Site> = {}) => {
     metaDesceription: "",
     searchSuggestWords: [],
     state: SiteState.unpublished,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     processStage: ProcessStage.pending,
   };
 
-  return { newSite, ...site } as Site;
+  return { ...newSite, ...site } as Site;
 };
