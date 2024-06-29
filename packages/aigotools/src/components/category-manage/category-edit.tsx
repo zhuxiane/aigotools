@@ -19,16 +19,17 @@ import { useQuery } from "@tanstack/react-query";
 
 import { managerSearchCategories, saveCategory } from "@/lib/actions";
 import { Category } from "@/models/category";
+import { CategoryFormState, CategoryWithParent } from "./category-manage";
 
 export default function CategoryEdit({
   category,
   onClose,
 }: {
-  category?: Category;
+  category?: CategoryWithParent;
   onClose: () => void;
 }) {
   const { register, getValues, setValue, watch, reset, trigger, formState } =
-    useForm<Category>({
+    useForm<CategoryFormState>({
       defaultValues: category,
     });
 
@@ -56,7 +57,7 @@ export default function CategoryEdit({
       setSaving(true);
       const values = getValues();
 
-      await saveCategory(values);
+      // await saveCategory(values);
       onClose();
     } catch (error) {
       console.log(error);
@@ -84,7 +85,7 @@ export default function CategoryEdit({
     <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
       <ModalContent>
         <ModalHeader>
-          {category?._id ? t("updateTitle") : t("newTitle")}
+          {category?.id ? t("updateTitle") : t("newTitle")}
         </ModalHeader>
         <ModalBody>
           <form className="overflow-auto space-y-4">
@@ -101,7 +102,7 @@ export default function CategoryEdit({
             <Input
               label={t("categoryIcon")}
               size="sm"
-              value={formValues.icon}
+              value={formValues.icon || undefined}
               {...register("icon")}
             />
             {!!formValues.parent && (
@@ -130,7 +131,7 @@ export default function CategoryEdit({
             >
               {allTopCategories.map((category) => {
                 return (
-                  <SelectItem key={category._id}>{category.name}</SelectItem>
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
                 );
               })}
             </Select>

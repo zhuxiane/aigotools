@@ -1,11 +1,13 @@
-import { Category } from "@prisma/client";
+import { Prisma, Category } from "@prisma/client";
 
-export interface CategoryWithParent extends Category {
-  parent?: Prisma.CategoryGetPayload<{
-    // 选择 parent 字段的特定属性
-    select: {
-      id: true;
-      name: true;
-    }
-  }>;
-}
+const categoryWithParent = Prisma.validator<Prisma.CategoryDefaultArgs>()({
+  include: { parent: true },
+});
+
+export type CategoryWithParent = Prisma.CategoryGetPayload<
+  typeof categoryWithParent
+>;
+
+// 定义兼容新增和编辑的联合类型
+export type CategoryFormState = Prisma.CategoryUncheckedCreateInput &
+  Partial<Prisma.CategoryUncheckedUpdateInput>;

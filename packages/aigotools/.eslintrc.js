@@ -94,14 +94,5 @@ module.exports = {
         next: ["const", "let", "var"],
       },
     ],
-    "prettier/prettier": [
-      "error",
-      {
-        // 设置保留结尾逗号
-        trailingComma: "all",
-        // 其他 Prettier 配置项
-        endOfLine: "auto",
-      },
-    ],
   },
 };

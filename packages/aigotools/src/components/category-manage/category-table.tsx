@@ -29,7 +29,7 @@ import Loading from "@/components/common/loading";
 import EmptyImage from "@/components/search/empty-image";
 import { Prisma, Category } from "@prisma/client";
 import { createTemplateCategory } from "@/lib/create-template-category";
-import { CategoryWithParent } from './category-manage'
+import { CategoryFormState, CategoryWithParent } from "./category-manage";
 
 export default function CategoryTable() {
   const t = useTranslations("categoryManage");
@@ -38,7 +38,9 @@ export default function CategoryTable() {
     count: 0,
     totalPage: 0,
   });
-  const [category, setCategory] = useState<CategoryWithParent | undefined>(undefined);
+  const [category, setCategory] = useState<CategoryWithParent | undefined>(
+    undefined
+  );
 
   const [loading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<CategorySearchForm>({
@@ -83,16 +85,16 @@ export default function CategoryTable() {
     initialData: [],
   });
 
-  const topCategoryNameMap = useMemo(() => {
-    return allTopCategories.reduce((t, c) => {
-      return {
-        ...t,
-        [c.id]: c.name,
-      };
-    }, {} as Record<string, string>);
-  }, [allTopCategories]);
+  // const topCategoryNameMap = useMemo(() => {
+  //   return allTopCategories.reduce((t, c) => {
+  //     return {
+  //       ...t,
+  //       [c.id]: c.name,
+  //     };
+  //   }, {} as Record<string, string>);
+  // }, [allTopCategories]);
 
-  console.log(topCategoryNameMap);
+  // console.log(topCategoryNameMap);
 
   return (
     <div className="mt-4 relative py-4">
@@ -137,9 +139,7 @@ export default function CategoryTable() {
             }
           >
             {allTopCategories.map((category) => {
-              return (
-                <SelectItem key={category.id}>{category.name}</SelectItem>
-              );
+              return <SelectItem key={category.id}>{category.name}</SelectItem>;
             })}
           </Select>
         )}
@@ -157,7 +157,7 @@ export default function CategoryTable() {
             1000,
             {
               maxWait: 5000,
-            },
+            }
           )}
         />
       </div>
@@ -192,9 +192,7 @@ export default function CategoryTable() {
                       : "False"
                     : "-"}
                 </TableCell>
-                <TableCell>
-                  {category.parent?.name}
-                </TableCell>
+                <TableCell>{category.parent?.name}</TableCell>
                 <TableCell>
                   {dayjs(category.updatedAt).format("YYYY-MM-DD HH:mm:ss")}
                 </TableCell>

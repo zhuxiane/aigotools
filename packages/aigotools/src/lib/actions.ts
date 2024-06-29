@@ -743,60 +743,61 @@ export async function stopAllSitesCrawl(
   }
 }
 
-// /** Category */
-// export async function saveCategory(category: Category) {
-//   try {
-//     await assertIsManager();
-//     await dbConnect();
+/** Category */
+export async function saveCategory(category: Category) {
+  try {
+    await assertIsManager();
+    // await dbConnect();
 
-//     if (category._id) {
-//       category.updatedAt = Date.now();
-//       await CategoryModel.findByIdAndUpdate(category._id, { $set: category });
-//     } else {
-//       await CategoryModel.create(category);
-//     }
-//   } catch (error) {
-//     console.log("Dispatch site crawl error", error);
-//     throw error;
-//   }
-// }
+    // if (category._id) {
+    //   category.updatedAt = Date.now();
+    //   await CategoryModel.findByIdAndUpdate(category._id, { $set: category });
+    // } else {
+    //   await CategoryModel.create(category);
+    // }
+  } catch (error) {
+    console.log("Dispatch site crawl error", error);
+    throw error;
+  }
+}
 
 export async function deleteCategory(id: string) {
   try {
     await assertIsManager();
-    // 删除特定的 Category 记录
-    await prisma.category.delete({
-      where: {
-        id: id,
-      },
-    });
 
-    // 更新多个 Site 记录，从 categories 数组中移除特定的 ID
-    await prisma.site.updateMany({
+    // implicit many-to-many delete, 参考 https://github.com/prisma/prisma/discussions/19337
+    // 查找所有包含目标 Category 的 Site
+    const sites = await prisma.site.findMany({
       where: {
         categories: {
           some: {
-            id: id
-          }
-        },
-      },
-      data: {
-        categories: {
-          disconnect: true, // 断开与特定 ID 的连接
+            id,
+          },
         },
       },
       include: {
-        categories: true // Include all categories in the returned object
-      }
-    });
-
-    // 删除所有 parent 为特定 ID 的 Category 记录
-    await prisma.category.deleteMany({
-      where: {
-        parent: id,
+        categories: true,
       },
     });
-  
+
+    const [_, categories] = await prisma.$transaction([
+      prisma.category.update({
+        where: { id },
+        data: {
+          sites: {
+            disconnect: sites.map((site) => ({
+              id: site.id,
+            })),
+          },
+        },
+      }),
+      prisma.category.delete({
+        where: {
+          id,
+        },
+      }),
+    ]);
+
     // await dbConnect();
 
     // await CategoryModel.findByIdAndDelete(id);
@@ -846,6 +847,9 @@ export async function managerSearchCategories(data: CategorySearchForm) {
     const [categories, count] = await prisma.$transaction([
       prisma.category.findMany({
         where: query,
+        include: {
+          parent: true,
+        },
         orderBy: { updatedAt: "desc" },
         skip: (data.page - 1) * data.size,
         take: data.size,

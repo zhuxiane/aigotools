@@ -12,8 +12,8 @@ import { Edit, Trash2 } from "lucide-react";
 
 import OperationIcon from "@/components/common/operation-icon";
 import { deleteCategory } from "@/lib/actions";
-import { Category } from "@/models/category";
-import { CategoryWithParent } from './category-manage'
+import { Category } from "@prisma/client";
+import { CategoryFormState, CategoryWithParent } from "./category-manage";
 
 export default function CategoryOperation({
   category,
