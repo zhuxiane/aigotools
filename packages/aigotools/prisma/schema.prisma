@@ -45,7 +45,7 @@ model Category {
   icon      String?
   name      String     @unique
   parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
-  parentId  String?    // 这里使用 parentId 字段来表示父类别的外键
+  parentId  String? // 这里使用 parentId 字段来表示父类别的外键
   children  Category[] @relation("CategoryToCategory") // 反向关系字段，表示当前类别的子类别列表
   featured  Boolean    @default(false)
   weight    Int        @default(0)
@@ -86,31 +86,31 @@ model Site {
 }
 
 model Link {
-  id      Int     @id @default(autoincrement())
-  site    Site    @relation(fields: [siteId], references: [id])
-  siteId  String  @unique
+  id     Int    @id @default(autoincrement())
+  site   Site   @relation(fields: [siteId], references: [id])
+  siteId String @unique
 }
 
 model Review {
-  id         String      @id @default(uuid())
-  name       String
-  url        String
-  userId     String
-  userEmail  String
-  state      ReviewState @default(pending)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id        String      @id @default(uuid())
+  name      String
+  url       String
+  userId    String
+  userEmail String
+  state     ReviewState @default(pending)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 
   @@map("reviews")
 }
 
 model Upvote {
-  id         String    @id @default(uuid())
+  id         String     @id @default(uuid())
   userId     String
   targetId   String
   upvoteType UpvoteType
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@map("upvotes")
 }

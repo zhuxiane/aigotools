@@ -13,13 +13,14 @@ import { Edit, Trash2 } from "lucide-react";
 import OperationIcon from "@/components/common/operation-icon";
 import { deleteCategory } from "@/lib/actions";
 import { Category } from "@/models/category";
+import { CategoryWithParent } from './category-manage'
 
 export default function CategoryOperation({
   category,
   handleSearch,
   onEdit,
 }: {
-  category: Category;
+  category: CategoryWithParent;
   handleSearch: () => void;
   onEdit: () => void;
 }) {
@@ -33,7 +34,7 @@ export default function CategoryOperation({
     }
     try {
       setDeleting(true);
-      await deleteCategory(category._id);
+      await deleteCategory(category.id);
 
       await handleSearch();
     } catch (error) {
@@ -42,7 +43,7 @@ export default function CategoryOperation({
     } finally {
       setDeleting(false);
     }
-  }, [category._id, deleting, handleSearch, t]);
+  }, [category.id, deleting, handleSearch, t]);
 
   return (
     <Dropdown

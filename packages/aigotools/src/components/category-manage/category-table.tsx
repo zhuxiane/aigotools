@@ -27,17 +27,18 @@ import CategoryOperation from "./category-operation";
 import { CategorySearchForm, managerSearchCategories } from "@/lib/actions";
 import Loading from "@/components/common/loading";
 import EmptyImage from "@/components/search/empty-image";
-import { Category } from "@prisma/client";
+import { Prisma, Category } from "@prisma/client";
 import { createTemplateCategory } from "@/lib/create-template-category";
+import { CategoryWithParent } from './category-manage'
 
 export default function CategoryTable() {
   const t = useTranslations("categoryManage");
   const [searchResult, setSearchResult] = useState({
-    categories: [] as Category[],
+    categories: [] as CategoryWithParent[],
     count: 0,
     totalPage: 0,
   });
-  const [category, setCategory] = useState<Category | undefined>(undefined);
+  const [category, setCategory] = useState<CategoryWithParent | undefined>(undefined);
 
   const [loading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<CategorySearchForm>({
@@ -86,7 +87,7 @@ export default function CategoryTable() {
     return allTopCategories.reduce((t, c) => {
       return {
         ...t,
-        [c._id]: c.name,
+        [c.id]: c.name,
       };
     }, {} as Record<string, string>);
   }, [allTopCategories]);
@@ -137,7 +138,7 @@ export default function CategoryTable() {
           >
             {allTopCategories.map((category) => {
               return (
-                <SelectItem key={category._id}>{category.name}</SelectItem>
+                <SelectItem key={category.id}>{category.name}</SelectItem>
               );
             })}
           </Select>
@@ -178,7 +179,7 @@ export default function CategoryTable() {
             }
           >
             {searchResult.categories.map((category) => (
-              <TableRow key={category._id}>
+              <TableRow key={category.id}>
                 <TableCell>
                   {category.icon}
                   {category.name}
@@ -192,8 +193,7 @@ export default function CategoryTable() {
                     : "-"}
                 </TableCell>
                 <TableCell>
-                  {(category.parent && topCategoryNameMap[category.parent]) ||
-                    category.parent}
+                  {category.parent?.name}
                 </TableCell>
                 <TableCell>
                   {dayjs(category.updatedAt).format("YYYY-MM-DD HH:mm:ss")}

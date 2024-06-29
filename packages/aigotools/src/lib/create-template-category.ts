@@ -1,11 +1,11 @@
-import { Category } from "@/models/category";
+import { Prisma, Category } from "@prisma/client";
 
 export const createTemplateCategory = (category: Partial<Category> = {}) => {
-  const newCategory: Omit<Category, "_id"> = {
+  const newCategory: Prisma.CategoryCreateInput = {
     name: "",
     icon: "",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     featured: false,
     weight: 0,
   };
@@ -13,7 +13,7 @@ export const createTemplateCategory = (category: Partial<Category> = {}) => {
   return {
     ...newCategory,
     ...category,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  } as Category;
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 };

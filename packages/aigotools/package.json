@@ -13,7 +13,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "prisma:migrate:dev:env": "dotenv -e .env.local npx prisma migrate dev"
+    "prisma:migrate:dev:env": "dotenv -e .env.local npx prisma migrate dev",
+    "prisma:db:push:env": "dotenv -e .env.local npx prisma db push"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.588.0",

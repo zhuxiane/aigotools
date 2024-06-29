@@ -761,26 +761,59 @@ export async function stopAllSitesCrawl(
 //   }
 // }
 
-// export async function deleteCategory(id: string) {
-//   try {
-//     await assertIsManager();
-//     await dbConnect();
+export async function deleteCategory(id: string) {
+  try {
+    await assertIsManager();
+    // 删除特定的 Category 记录
+    await prisma.category.delete({
+      where: {
+        id: id,
+      },
+    });
 
-//     await CategoryModel.findByIdAndDelete(id);
-//     await SiteModel.updateMany(
-//       {
-//         categories: id,
-//       },
-//       {
-//         $pull: { categories: id },
-//       }
-//     );
-//     await CategoryModel.deleteMany({ parent: id });
-//   } catch (error) {
-//     console.log("Dispatch site crawl error", error);
-//     throw error;
-//   }
-// }
+    // 更新多个 Site 记录，从 categories 数组中移除特定的 ID
+    await prisma.site.updateMany({
+      where: {
+        categories: {
+          some: {
+            id: id
+          }
+        },
+      },
+      data: {
+        categories: {
+          disconnect: true, // 断开与特定 ID 的连接
+        },
+      },
+      include: {
+        categories: true // Include all categories in the returned object
+      }
+    });
+
+    // 删除所有 parent 为特定 ID 的 Category 记录
+    await prisma.category.deleteMany({
+      where: {
+        parent: id,
+      },
+    });
+  
+    // await dbConnect();
+
+    // await CategoryModel.findByIdAndDelete(id);
+    // await SiteModel.updateMany(
+    //   {
+    //     categories: id,
+    //   },
+    //   {
+    //     $pull: { categories: id },
+    //   }
+    // );
+    // await CategoryModel.deleteMany({ parent: id });
+  } catch (error) {
+    console.log("Dispatch site crawl error", error);
+    throw error;
+  }
+}
 
 export interface CategorySearchForm {
   page: number;

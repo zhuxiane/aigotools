@@ -13,7 +13,9 @@ export const createTemplateSite = (
     snapshot: "",
     desceription: "",
     pricingType: "",
-    categories: [],
+    categories: {
+      connect: []
+    },
     images: [],
     features: [],
     usecases: [],
