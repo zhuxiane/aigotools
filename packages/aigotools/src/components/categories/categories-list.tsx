@@ -22,7 +22,7 @@ export default function CategoriesList() {
       <div>
         {categories.map((category) => {
           return (
-            <div key={category._id} className="mb-6">
+            <div key={category.id} className="mb-6">
               <h3 className="font-medium text-xl">
                 {[category.icon, category.name].filter(Boolean).join(" ")}
               </h3>
@@ -30,7 +30,7 @@ export default function CategoriesList() {
                 {category.children.map((item) => {
                   return (
                     <CategoryTag
-                      key={item._id}
+                      key={item.id}
                       onClick={() => {
                         const url = `/search?c=${encodeURIComponent(
                           item.name

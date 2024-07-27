@@ -31,7 +31,7 @@ import SiteEdit from "./site-edit";
 import SiteOperation from "./site-operation";
 
 import { ProcessStage, SiteState } from "@/lib/constants";
-import { Site } from "@/models/site";
+import { SelectSite, InsertSite } from "@/db/schema";
 import {
   SearchParams,
   dispatchAllSitesCrawl,
@@ -47,7 +47,7 @@ import { createTemplateSite } from "@/lib/create-template-site";
 export default function SitesTable() {
   const t = useTranslations("siteManage");
 
-  const [site, setSite] = useState<Site | undefined>(undefined);
+  const [site, setSite] = useState<InsertSite | undefined>(undefined);
   const [searchParams, setSearchParams] = useState<SearchParams>({
     page: 1,
     size: 15,
@@ -56,7 +56,7 @@ export default function SitesTable() {
   const defaultData = {
     count: 0,
     totalPage: 0,
-    sites: [] as Site[],
+    sites: [] as SelectSite[],
   };
 
   const {
@@ -77,13 +77,14 @@ export default function SitesTable() {
 
       return false;
     },
-    refetchInterval: 5000,
+    // refetchInterval: 5000,
     placeholderData: (pdata) => {
       console.log(pdata);
 
       return pdata;
     },
   });
+  console.log(searchResult);
 
   const { data: categories } = useQuery({
     queryKey: ["all-second-categories"],
@@ -98,6 +99,7 @@ export default function SitesTable() {
     },
     initialData: [],
   });
+  console.log(categories);
 
   const stopAllSite = useCallback(async () => {
     toast.promise(
@@ -121,7 +123,7 @@ export default function SitesTable() {
         pending: t("processing"),
         success: t("success"),
         error: t("fail"),
-      }
+      },
     );
   }, [handleSearch, searchParams, t]);
 
@@ -147,7 +149,7 @@ export default function SitesTable() {
         pending: t("processing"),
         success: t("success"),
         error: t("fail"),
-      }
+      },
     );
   }, [handleSearch, searchParams, t]);
 
@@ -196,7 +198,7 @@ export default function SitesTable() {
           }
         >
           {categories.map((category) => (
-            <SelectItem key={category._id}>
+            <SelectItem key={category.id}>
               {`${category.icon || ""} ${category.name}`.trim()}
             </SelectItem>
           ))}
@@ -255,7 +257,7 @@ export default function SitesTable() {
             1000,
             {
               maxWait: 5000,
-            }
+            },
           )}
         />
       </div>
@@ -279,7 +281,7 @@ export default function SitesTable() {
             }
           >
             {searchResult.sites.map((site, index) => (
-              <TableRow key={site._id}>
+              <TableRow key={site.id}>
                 <TableCell width={50}>{index + 1}</TableCell>
                 <TableCell>
                   <Link
@@ -307,7 +309,7 @@ export default function SitesTable() {
                       {
                         "bg-primary-500 opacity-80":
                           site.state !== SiteState.published,
-                      }
+                      },
                     )}
                   >
                     {t(site.state)}
@@ -324,7 +326,7 @@ export default function SitesTable() {
                           site.processStage === ProcessStage.processing,
                         "bg-primary-500 opacity-80":
                           site.processStage === ProcessStage.pending,
-                      }
+                      },
                     )}
                   >
                     {site.processStage === ProcessStage.processing && (

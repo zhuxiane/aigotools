@@ -14,7 +14,7 @@ export class SiteQueueProducer {
     });
   }
 
-  async batchAddCrawlJobs(siteIds: string[]) {
+  async batchAddCrawlJobs(siteIds: number[]) {
     await this.siteQueue.addBulk(
       siteIds.map((siteId) => {
         return {

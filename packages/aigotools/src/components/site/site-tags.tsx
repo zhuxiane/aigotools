@@ -3,10 +3,10 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
 
-import { Site } from "@/models/site";
+import { SelectSite } from "@/db/schema";
 import { useRouter } from "@/navigation";
 
-export default function SiteTags({ site }: { site: Site }) {
+export default function SiteTags({ site }: { site: SelectSite }) {
   const t = useTranslations("site");
 
   const router = useRouter();
@@ -32,10 +32,10 @@ export default function SiteTags({ site }: { site: Site }) {
         tags: site.pricings,
       });
     }
-    if (site.relatedSearchs?.length) {
+    if (site.relatedSearches?.length) {
       gt.push({
         title: t("relatedSearchs"),
-        tags: site.relatedSearchs,
+        tags: site.relatedSearches,
         onClick: (item: string) => {
           router.push(`/search?s=${encodeURIComponent(item)}`);
         },
@@ -47,7 +47,7 @@ export default function SiteTags({ site }: { site: Site }) {
     router,
     site.categories,
     site.pricings,
-    site.relatedSearchs,
+    site.relatedSearches,
     site.users,
     t,
   ]);

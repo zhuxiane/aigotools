@@ -11,7 +11,7 @@ export interface SiteDocument extends mongoose.Document {
   weight: number;
   name: string;
   snapshot: string;
-  desceription: string;
+  description: string;
   pricingType: string;
   categories: string[];
   images: string[];
@@ -28,7 +28,7 @@ export interface SiteDocument extends mongoose.Document {
   };
   voteCount: number;
   metaKeywords: string[];
-  metaDesceription: string;
+  metadescription: string;
   searchSuggestWords: string[];
   state: SiteState;
   processStage: ProcessStage;
@@ -46,7 +46,7 @@ const SiteSchema = new mongoose.Schema<SiteDocument>({
   featured: { type: Boolean, default: false },
   weight: { type: Number, default: 0, index: true },
   snapshot: { type: String, default: "" },
-  desceription: { type: String, default: "" },
+  description: { type: String, default: "" },
   pricingType: { type: String, default: "" },
   categories: {
     type: [mongoose.Types.ObjectId],
@@ -63,7 +63,7 @@ const SiteSchema = new mongoose.Schema<SiteDocument>({
   links: { type: Object, default: () => ({}) },
   voteCount: { type: Number, default: 0 },
   metaKeywords: { type: [String], default: () => [] },
-  metaDesceription: { type: String, default: "" },
+  metadescription: { type: String, default: "" },
   searchSuggestWords: { type: [String], default: () => [] },
   state: {
     type: String,
@@ -94,7 +94,7 @@ export const ensureSiteIndexes = async () => {
   SiteSchema.index({
     url: "text",
     name: "text",
-    desceription: "text",
+    description: "text",
     categories: "text",
     features: "text",
     usecases: "text",

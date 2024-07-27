@@ -10,6 +10,7 @@ import { AppConfig } from "./config";
 
 const s3 = new S3Client({
   region: AppConfig.s3Region,
+  endpoint: AppConfig.s3EndPoint,
   credentials: {
     accessKeyId: AppConfig.s3AccessKey as string,
     secretAccessKey: AppConfig.s3Secert as string,
@@ -18,7 +19,7 @@ const s3 = new S3Client({
 
 export async function uploadBufferToS3(
   buffer: Buffer,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
   const subfix = contentType.split("/").pop();
   const fileKey = subfix ? `${v4()}.${subfix}` : v4();
@@ -49,7 +50,7 @@ export async function uploadFormDataToS3(formData: FormData) {
       const buffer = (await file.arrayBuffer()) as Buffer;
 
       return uploadBufferToS3(buffer, file.type);
-    })
+    }),
   );
 
   return uploadRes;

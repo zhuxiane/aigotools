@@ -9,9 +9,9 @@ import VoteButton from "./vote-button";
 import ListItem from "./list-item";
 import SiteTags from "./site-tags";
 
-import { Site } from "@/models/site";
+import { SelectSite } from "@/db/schema";
 
-export default function SiteDetail({ site }: { site: Site }) {
+export default function SiteDetail({ site }: { site: SelectSite }) {
   const t = useTranslations("site");
 
   return (
@@ -24,7 +24,7 @@ export default function SiteDetail({ site }: { site: Site }) {
         <h2
           className={clsx(
             "inline-flex relative gap-2 px-2 items-center justify-center text-center text-3xl leading-0 font-bold text-primary-800",
-            "after:content-[' '] after:overflow-hidden after:absolute after:-bottom-[1px] after:left-0 after:h-[2px] after:bg-primary-800 after:w-0 hover:after:w-full after:transition-width"
+            "after:content-[' '] after:overflow-hidden after:absolute after:-bottom-[1px] after:left-0 after:h-[2px] after:bg-primary-800 after:w-0 hover:after:w-full after:transition-width",
           )}
         >
           <span>{site.name}</span>
@@ -39,37 +39,37 @@ export default function SiteDetail({ site }: { site: Site }) {
         <div className="flex-1 basis-full lg:basis-[30%]">
           <Image
             isZoomed
-            alt={site.name}
+            alt={site.name || undefined}
             classNames={{
               wrapper: "w-full !max-w-full cursor-pointer",
               img: "w-full aspect-video object-fill",
             }}
             radius="sm"
-            src={site.snapshot}
+            src={site.snapshot || undefined}
           />
           <SiteTags site={site} />
         </div>
         <div className="flex-1 basis-full lg:basis-[70%] text-base text-primary-700 font-normal">
-          <div>{site.desceription}</div>
-          {site.features.length > 0 && (
+          <div>{site.description}</div>
+          {(site.features?.length ?? 0) > 0 && (
             <>
               <h3 className="my-6 font-bold text-2xl text-primary-800">
                 {t("topFeatures")}
               </h3>
               <ol>
-                {site.features.map((item, i) => (
+                {site.features?.map((item, i) => (
                   <ListItem key={i}>{item}</ListItem>
                 ))}
               </ol>
             </>
           )}
-          {site.usecases.length > 0 && (
+          {(site.usecases?.length ?? 0) > 0 && (
             <>
               <h3 className="my-6 font-bold text-2xl text-primary-800">
                 {t("usecases")}
               </h3>
               <ol>
-                {site.usecases.map((item, i) => (
+                {site.usecases?.map((item, i) => (
                   <ListItem key={i}>{item}</ListItem>
                 ))}
               </ol>

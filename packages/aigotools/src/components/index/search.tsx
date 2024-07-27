@@ -46,11 +46,11 @@ export default function Search({
     (newRecord: string) => {
       window.localStorage.setItem(
         "histories",
-        JSON.stringify([newRecord, ...histories].slice(10))
+        JSON.stringify([newRecord, ...histories].slice(10)),
       );
       loadHistories();
     },
-    [histories, loadHistories]
+    [histories, loadHistories],
   );
 
   const clearHistories = useCallback(() => {
@@ -150,11 +150,11 @@ export default function Search({
           {featuredCategories.map((item) => {
             return (
               <CategoryTag
-                key={item._id}
+                key={item.id}
                 active={item.name === category}
                 onClick={() => {
                   const url = `/search?s=${encodeURIComponent(
-                    value
+                    value,
                   )}&c=${encodeURIComponent(item.name)}`;
 
                   router.push(url);

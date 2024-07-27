@@ -31,7 +31,7 @@ export default async function Page({ params }: { params: { site: string } }) {
 
   return (
     <Container className="mt-4">
-      <NavBar name={site.site.name} />
+      <NavBar name={site.site.name || []} />
       <SiteDetail site={site.site} />
       {site.suggests.length > 0 && (
         <SiteGroup sites={site.suggests} title={t("relatedTools")} />

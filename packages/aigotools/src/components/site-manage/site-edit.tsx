@@ -18,22 +18,22 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 
-import LinksInput from "./links-input";
-
-import { Site } from "@/models/site";
+import { InsertSite } from "@/db/schema";
 import ArrowInput from "@/components/common/arrow-input";
 import SingleImageUpload from "@/components/common/single-image-upload";
 import { managerSearchCategories, saveSite } from "@/lib/actions";
+
+import LinksInput from "./links-input";
 
 export default function SiteEdit({
   site,
   onClose,
 }: {
-  site?: Site;
+  site?: InsertSite;
   onClose: () => void;
 }) {
   const { register, getValues, setValue, watch, reset, trigger, formState } =
-    useForm<Site>({
+    useForm<InsertSite>({
       defaultValues: site,
     });
 
@@ -101,7 +101,7 @@ export default function SiteEdit({
     >
       <ModalContent>
         <ModalHeader>
-          {site?._id ? t("updateTitle") : t("newTitle")}
+          {site?.id ? t("updateTitle") : t("newTitle")}
         </ModalHeader>
         <ModalBody>
           <form className="grid grid-cols-2 gap-4 max-h-[65vh] pb-1 overflow-auto">
@@ -118,19 +118,19 @@ export default function SiteEdit({
             <Input
               label={t("name")}
               size="sm"
-              value={formValues.name}
+              value={formValues.name as unknown as any}
               {...register("name")}
             />
             <Input
               label={t("pricingType")}
               size="sm"
-              value={formValues.pricingType}
+              value={formValues.pricingType as unknown as any}
               {...register("pricingType")}
             />
             <div className="flex items-center justify-between py-3 rounded-lg px-3 bg-primary-100">
               <label className="text-sm"> {t("featured")}</label>
               <Switch
-                checked={formValues.featured}
+                checked={formValues.featured as unknown as any}
                 size="sm"
                 {...register("featured")}
               />
@@ -145,66 +145,66 @@ export default function SiteEdit({
             />
             <Select
               label={t("categories")}
-              selectedKeys={formValues.categories}
+              selectedKeys={formValues.categories as unknown as any}
               selectionMode="multiple"
               size="sm"
               onSelectionChange={(value) => {
                 setValue(
                   "categories",
-                  Array.from(value).map((item) => item.toString())
+                  Array.from(value).map((item) => item.toString()),
                 );
               }}
             >
               {categories.map((category) => {
                 return (
-                  <SelectItem key={category._id}>{category.name}</SelectItem>
+                  <SelectItem key={category.id}>{category.name}</SelectItem>
                 );
               })}
             </Select>
             <ArrowInput
               label={t("features")}
-              value={formValues.features}
+              value={formValues.features as unknown as any}
               onChange={(value) => {
                 setValue("features", value);
               }}
             />
             <ArrowInput
               label={t("pricings")}
-              value={formValues.pricings}
+              value={formValues.pricings as unknown as any}
               onChange={(value) => {
                 setValue("pricings", value);
               }}
             />
             <LinksInput
-              value={formValues.links}
+              value={formValues.links as unknown as any}
               onChange={(value) => {
                 setValue("links", value);
               }}
             />
             <ArrowInput
               label={t("usecases")}
-              value={formValues.usecases}
+              value={formValues.usecases as unknown as any}
               onChange={(value) => {
                 setValue("usecases", value);
               }}
             />
             <ArrowInput
               label={t("relatedSearchs")}
-              value={formValues.relatedSearchs}
+              value={formValues.relatedSearches as unknown as any}
               onChange={(value) => {
-                setValue("relatedSearchs", value);
+                setValue("relatedSearches", value);
               }}
             />
             <ArrowInput
               label={t("users")}
-              value={formValues.users}
+              value={formValues.users as unknown as any}
               onChange={(value) => {
                 setValue("users", value);
               }}
             />
             <SingleImageUpload
               label={t("snapshot")}
-              value={formValues.snapshot}
+              value={formValues.snapshot as unknown as any}
               onChange={(value) => {
                 setValue("snapshot", value);
               }}
@@ -218,10 +218,10 @@ export default function SiteEdit({
             /> */}
 
             <Textarea
-              label={t("desceription")}
+              label={t("description")}
               size="sm"
-              value={formValues.desceription}
-              {...register("desceription")}
+              value={formValues.description as unknown as any}
+              {...register("description")}
               className="col-span-2"
             />
           </form>

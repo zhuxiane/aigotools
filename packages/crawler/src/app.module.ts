@@ -3,28 +3,56 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+// import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BasicAuthMiddleware } from './middleware/basic-auth.middleware';
 import { Site, SiteSchema } from './schemas/site.schema';
 import { SiteQueueModule } from './site-queue/site-queue.module';
-import { MinioService } from './providers/minio.service';
+// import { MinioService } from './providers/minio.service';
+import * as schema from './db/schema';
+import { DrizzleTursoModule } from '@knaadh/nestjs-drizzle-turso';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env.local', '.env.prod', '.env.dev', '.env'],
     }),
-    MongooseModule.forRootAsync({
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get('MONGODB_URI'),
-      }),
+    DrizzleTursoModule.registerAsync({
+      tag: 'DB',
+      useFactory(configService: ConfigService) {
+        const url = configService.get('TURSO_DATABASE_URL');
+        const token = configService.get('TURSO_AUTH_TOKEN');
+        let config: any = {
+          url,
+        };
+
+        // 开发环境不需要token
+        if (token) {
+          config = {
+            ...config,
+            token,
+          };
+        }
+        return {
+          turso: {
+            config,
+          },
+          config: { schema: { ...schema } },
+        };
+      },
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
-    MongooseModule.forFeature([{ name: Site.name, schema: SiteSchema }]),
+    // MongooseModule.forRootAsync({
+    //   useFactory: (configService: ConfigService) => ({
+    //     uri: configService.get('MONGODB_URI'),
+    //   }),
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    // }),
+    // MongooseModule.forFeature([{ name: Site.name, schema: SiteSchema }]),
     BullModule.forRootAsync({
       useFactory(configService: ConfigService) {
         return {
@@ -66,7 +94,11 @@ import { MinioService } from './providers/minio.service';
     ]),
   ],
   controllers: [AppController],
-  providers: [AppService, ConfigService, MinioService],
+  providers: [
+    AppService,
+    ConfigService,
+    // MinioService
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

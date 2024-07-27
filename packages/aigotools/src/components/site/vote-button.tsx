@@ -8,10 +8,10 @@ import { useAuth } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
 import clsx from "clsx";
 
-import { Site } from "@/models/site";
+import { SelectSite } from "@/db/schema";
 import { isUserUpVoteSite, triggerUpvoteSite } from "@/lib/actions";
 
-export default function VoteButton({ site }: { site: Site }) {
+export default function VoteButton({ site }: { site: SelectSite }) {
   const t = useTranslations("site");
   const [isUpvoted, setIsUpvoted] = useState(false);
   const [voteCount, setVoteCount] = useState(site.voteCount);
@@ -24,7 +24,7 @@ export default function VoteButton({ site }: { site: Site }) {
         return;
       }
       setIsLoading(true);
-      const { count, upvoted } = await triggerUpvoteSite(site._id);
+      const { count, upvoted } = await triggerUpvoteSite(site.id);
 
       setIsUpvoted(upvoted);
       setVoteCount(count);
@@ -38,7 +38,7 @@ export default function VoteButton({ site }: { site: Site }) {
   useEffect(() => {
     const update = async () => {
       setVoteCount(site.voteCount);
-      setIsUpvoted(await isUserUpVoteSite(site._id));
+      setIsUpvoted(await isUserUpVoteSite(site.id));
     };
 
     update().finally(() => {
@@ -59,7 +59,7 @@ export default function VoteButton({ site }: { site: Site }) {
     >
       <ThumbsUpIcon size={14} strokeWidth={3} />
       {t("upvote")}
-      {voteCount > 0 && <span>{voteCount}</span>}
+      {(voteCount ?? 0 > 0) && <span>{voteCount}</span>}
     </Button>
   );
 

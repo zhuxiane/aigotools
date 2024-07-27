@@ -22,7 +22,7 @@ import { ReviewState } from "@/lib/constants";
 import { managerSearchReviews, updateReviewState } from "@/lib/actions";
 import Loading from "@/components/common/loading";
 import EmptyImage from "@/components/search/empty-image";
-import { Review } from "@/models/review";
+import { SelectReview, InsertReview } from "@/db/schema";
 import { Link } from "@/navigation";
 
 import ReviewOperation from "./review-operation";
@@ -37,7 +37,7 @@ interface ReviewForm {
 export default function ReviewTable() {
   const t = useTranslations("reviewManage");
   const [searchResult, setSearchResult] = useState({
-    reviews: [] as Review[],
+    reviews: [] as SelectReview[],
     count: 0,
     totalPage: 0,
   });
@@ -67,15 +67,15 @@ export default function ReviewTable() {
   }, [loading, searchParams, t]);
 
   const handleUpdateReviewState = useCallback(
-    async (review: Review, state: ReviewState) => {
+    async (review: SelectReview, state: ReviewState) => {
       if (updating) {
         return false;
       }
 
       try {
-        setUpdating(review._id);
+        setUpdating(String(review.id));
 
-        await updateReviewState(review._id, state);
+        await updateReviewState(review.id, state);
 
         await handleSearch();
       } catch (error) {
@@ -152,7 +152,7 @@ export default function ReviewTable() {
             }
           >
             {searchResult.reviews.map((review) => (
-              <TableRow key={review._id}>
+              <TableRow key={review.id}>
                 <TableCell>{review.name}</TableCell>
                 <TableCell>
                   <Link

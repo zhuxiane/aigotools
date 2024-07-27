@@ -3,15 +3,15 @@ import clsx from "clsx";
 import { Image } from "@nextui-org/react";
 import { ExternalLink, ThumbsUpIcon } from "lucide-react";
 
-import { Site } from "@/models/site";
+import { SelectSite } from "@/db/schema";
 import { useRouter } from "@/navigation";
 
-export default function SiteCard({ site }: { site: Site }) {
+export default function SiteCard({ site }: { site: SelectSite }) {
   const router = useRouter();
 
   return (
     <div
-      key={site._id as string}
+      key={site.id}
       className="group w-full shadow-medium hover:shadow-large transition-all bg-primary-100 rounded-md overflow-hidden cursor-pointer"
       onClick={() => {
         router.push(`/s/${site.siteKey}`);
@@ -19,34 +19,33 @@ export default function SiteCard({ site }: { site: Site }) {
     >
       <Image
         isZoomed
-        alt={site.name}
+        alt={site.name || undefined}
         classNames={{
           wrapper: "w-full !max-w-full",
           img: "w-full aspect-video object-fill",
         }}
         radius="none"
-        src={site.snapshot}
+        src={site.snapshot || undefined}
       />
       <div className="p-4">
         <div className="flex justify-between items-center">
           <div
             className={clsx(
               "flex items-center text-primary-800 font-semibold gap-2 relative",
-              "after:content-[' '] after:overflow-hidden after:absolute after:-bottom-[1px] after:left-0 after:h-[2px] after:bg-primary-900 after:w-0 group-hover:after:w-full after:transition-width"
+              "after:content-[' '] after:overflow-hidden after:absolute after:-bottom-[1px] after:left-0 after:h-[2px] after:bg-primary-900 after:w-0 group-hover:after:w-full after:transition-width",
             )}
           >
             <h3 className="text-lg">{site.name}</h3>
             <ExternalLink size={16} />
           </div>
-          {site.voteCount > 0 && (
-            <div className="flex items-center text-primary-500 gap-1">
-              <ThumbsUpIcon size={13} />
-              <span className="text-sm">{site.voteCount}</span>
-            </div>
-          )}
+
+          <div className="flex items-center text-primary-500 gap-1">
+            <ThumbsUpIcon size={13} />
+            <span className="text-sm">{site.voteCount}</span>
+          </div>
         </div>
         <div className="mt-2 text-primary-400 text-sm overflow-hidden text-ellipsis line-clamp-2">
-          {site.desceription}
+          {site.description}
         </div>
         <div className="mt-4 flex items-center justify-between gap-4">
           <div className="flex flex-wrap gap-2">

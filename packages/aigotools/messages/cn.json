@@ -32,8 +32,8 @@
     "more": "更多 +"
   },
   "metadata": {
-    "title": "aigotools.com",
-    "description": "AigoTools 是领先的AI目录和搜索引擎。AigoTools 帮助您发现最佳AI、应用程序和服务列表，并提升您的个人和商业生产力至新高度。",
+    "title": "OrgAi.net",
+    "description": "OrgAi 是领先的AI目录和搜索引擎。AigoTools 帮助您发现最佳AI、应用程序和服务列表，并提升您的个人和商业生产力至新高度。",
     "keywords": "开源AI导航站, AI目录, AI列表, AI搜索引擎, 人工智能应用程序, 最佳AI目录, 最佳AI, AI列表"
   },
   "site": {
@@ -65,9 +65,9 @@
     "title": "提交你的AI工具",
     "subTitle": "一键提交你的网站",
     "websiteName": "网站名称",
-    "websiteNamePlaceholder": "AigoTools",
+    "websiteNamePlaceholder": "OrgAi",
     "websiteUrl": "网站URL",
-    "websiteUrlPlaceholder": "https://aigotools.com",
+    "websiteUrlPlaceholder": "https://orgai.net",
     "submit": "提交",
     "requireName": "需要名称",
     "requireUrl": "需要URL",

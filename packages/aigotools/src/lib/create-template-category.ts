@@ -1,11 +1,9 @@
-import { Category } from "@/models/category";
+import { SelectCategory, InsertCategory } from "@/db/schema";
 
-export const createTemplateCategory = (category: Partial<Category> = {}) => {
-  const newCategory: Omit<Category, "_id"> = {
+export const createTemplateCategory = (category: SelectCategory | {} = {}) => {
+  const newCategory: InsertCategory = {
     name: "",
     icon: "",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
     featured: false,
     weight: 0,
   };
@@ -13,7 +11,5 @@ export const createTemplateCategory = (category: Partial<Category> = {}) => {
   return {
     ...newCategory,
     ...category,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-  } as Category;
+  } as InsertCategory;
 };

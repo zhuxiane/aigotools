@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppService, BatchParams } from './app.service';
 import { MinioService } from './providers/minio.service';
@@ -8,8 +8,13 @@ export class AppController {
   constructor(
     private readonly appService: AppService,
     private readonly configService: ConfigService,
-    private readonly minioService: MinioService,
+    // private readonly minioService: MinioService,
   ) {}
+
+  @Get('test')
+  async test() {
+    await this.appService.test();
+  }
 
   @Post('dispatch')
   async batchDispatchSites(@Body() body: BatchParams) {

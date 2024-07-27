@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 import { toast } from "react-toastify";
 import { Atom, Axe, Edit, StopCircle, Trash2 } from "lucide-react";
 
-import { Site } from "@/models/site";
+import { InsertSite, SelectSite } from "@/db/schema";
 import { ProcessStage, SiteState } from "@/lib/constants";
 import {
   deleteSite,
@@ -25,7 +25,7 @@ export default function SiteOperation({
   handleSearch,
   onEdit,
 }: {
-  site: Site;
+  site: SelectSite;
   handleSearch: () => void;
   onEdit: () => void;
 }) {
@@ -34,7 +34,7 @@ export default function SiteOperation({
   const [operationing, setOperationing] = useState(false);
 
   const handleUpdateSitePublish = useCallback(
-    async (site: Site) => {
+    async (site: SelectSite) => {
       if (operationing) {
         return false;
       }
@@ -63,7 +63,7 @@ export default function SiteOperation({
       try {
         setOperationing(true);
 
-        await stopSiteCrawl(site._id);
+        await stopSiteCrawl(site.id);
         await handleSearch();
       } catch (error) {
         console.log(error);
@@ -72,7 +72,7 @@ export default function SiteOperation({
         setOperationing(false);
       }
     },
-    [handleSearch, operationing, site._id, t],
+    [handleSearch, operationing, site.id, t],
   );
 
   const handleDeleteSite = useCallback(
@@ -83,7 +83,7 @@ export default function SiteOperation({
       try {
         setOperationing(true);
 
-        await deleteSite(site._id);
+        await deleteSite(site.id);
         await handleSearch();
       } catch (error) {
         console.log(error);
@@ -92,7 +92,7 @@ export default function SiteOperation({
         setOperationing(false);
       }
     },
-    [handleSearch, operationing, site._id, t],
+    [handleSearch, operationing, site.id, t],
   );
 
   const dispatchSite = useCallback(
@@ -102,7 +102,7 @@ export default function SiteOperation({
       }
       try {
         setOperationing(true);
-        await dispatchSiteCrawl(site._id);
+        await dispatchSiteCrawl(site.id);
         await handleSearch();
       } catch (error) {
         console.log(error);
@@ -111,7 +111,7 @@ export default function SiteOperation({
         setOperationing(false);
       }
     },
-    [handleSearch, operationing, site._id, t],
+    [handleSearch, operationing, site.id, t],
   );
 
   return (

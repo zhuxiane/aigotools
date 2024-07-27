@@ -18,17 +18,17 @@ import { toast } from "react-toastify";
 import { useQuery } from "@tanstack/react-query";
 
 import { managerSearchCategories, saveCategory } from "@/lib/actions";
-import { Category } from "@/models/category";
+import { InsertCategory } from "@/db/schema";
 
 export default function CategoryEdit({
   category,
   onClose,
 }: {
-  category?: Category;
+  category?: InsertCategory;
   onClose: () => void;
 }) {
   const { register, getValues, setValue, watch, reset, trigger, formState } =
-    useForm<Category>({
+    useForm<InsertCategory>({
       defaultValues: category,
     });
 
@@ -84,7 +84,7 @@ export default function CategoryEdit({
     <Modal isOpen={isOpen} onClose={() => setIsOpen(false)}>
       <ModalContent>
         <ModalHeader>
-          {category?._id ? t("updateTitle") : t("newTitle")}
+          {category?.id ? t("updateTitle") : t("newTitle")}
         </ModalHeader>
         <ModalBody>
           <form className="overflow-auto space-y-4">
@@ -101,14 +101,14 @@ export default function CategoryEdit({
             <Input
               label={t("categoryIcon")}
               size="sm"
-              value={formValues.icon}
+              value={formValues.icon as unknown as any}
               {...register("icon")}
             />
             {!!formValues.parent && (
               <div className="flex items-center justify-between py-3 rounded-lg px-3 bg-primary-100">
                 <label className="text-sm"> {t("featured")}</label>
                 <Switch
-                  checked={formValues.featured}
+                  checked={formValues.featured as unknown as any}
                   size="sm"
                   {...register("featured")}
                 />
@@ -124,13 +124,15 @@ export default function CategoryEdit({
             />
             <Select
               label={t("parentCategory")}
-              selectedKeys={[formValues.parent] as any}
+              selectedKeys={[String(formValues.parent)] as any}
               size="sm"
-              onChange={(e) => setValue("parent", e.target.value)}
+              onChange={(e) => setValue("parent", Number(e.target.value))}
             >
               {allTopCategories.map((category) => {
                 return (
-                  <SelectItem key={category._id}>{category.name}</SelectItem>
+                  <SelectItem key={String(category.id)}>
+                    {category.name}
+                  </SelectItem>
                 );
               })}
             </Select>

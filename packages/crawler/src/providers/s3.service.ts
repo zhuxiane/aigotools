@@ -13,6 +13,7 @@ export class S3Service {
   constructor(private configService: ConfigService) {
     this.s3 = new S3Client({
       region: configService.get('S3_REGION'),
+      endpoint: configService.get('S3_ENDPOINT'),
       credentials: {
         accessKeyId: configService.get('S3_ACCESS_KEY_ID'),
         secretAccessKey: configService.get('S3_ACCESS_SECERT'),

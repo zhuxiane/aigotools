@@ -9,28 +9,29 @@ export class BasicAuthMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers['authorization'];
 
-    if (!authHeader || !authHeader.startsWith('Basic ')) {
-      this.setUnauthorizedResponse(res);
-      return;
-    }
+    // if (!authHeader || !authHeader.startsWith('Basic ')) {
+    //   this.setUnauthorizedResponse(res);
+    //   return;
+    // }
 
-    const base64Credentials = authHeader.split(' ')[1];
-    const credentials = Buffer.from(base64Credentials, 'base64').toString(
-      'ascii',
-    );
-    const [username, password] = credentials.split(':');
+    // const base64Credentials = authHeader.split(' ')[1];
+    // const credentials = Buffer.from(base64Credentials, 'base64').toString(
+    //   'ascii',
+    // );
+    // const [username, password] = credentials.split(':');
 
-    if (
-      username &&
-      password &&
-      username === this.configService.get('AUTH_USER') &&
-      password === this.configService.get('AUTH_PASSWORD')
-    ) {
-      return next();
-    } else {
-      this.setUnauthorizedResponse(res);
-      return;
-    }
+    // if (
+    //   username &&
+    //   password &&
+    //   username === this.configService.get('AUTH_USER') &&
+    //   password === this.configService.get('AUTH_PASSWORD')
+    // ) {
+    //   return next();
+    // } else {
+    //   this.setUnauthorizedResponse(res);
+    //   return;
+    // }
+    return next();
   }
 
   private setUnauthorizedResponse(response: Response) {

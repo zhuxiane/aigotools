@@ -35,7 +35,7 @@ export default clerkMiddleware(
 
     return intlMiddleware(req);
   },
-  { debug: AppConfig.debugClerk }
+  { debug: AppConfig.debugClerk },
 );
 
 export const config = {

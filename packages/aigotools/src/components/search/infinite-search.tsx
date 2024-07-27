@@ -12,7 +12,7 @@ import EmptyImage from "./empty-image";
 import Search from "@/components/index/search";
 import { searchSites } from "@/lib/actions";
 import SiteGroup from "@/components/common/sites-group";
-import { Site } from "@/models/site";
+import { SelectSite } from "@/db/schema";
 
 export default function InfiniteSearch() {
   const searchParams = useSearchParams();
@@ -52,7 +52,7 @@ export default function InfiniteSearch() {
   }, [search, refetch, category]);
 
   const sites =
-    data?.pages.reduce((t, c) => t.concat(c.sites), [] as Site[]) || [];
+    data?.pages.reduce((t, c) => t.concat(c.sites), [] as SelectSite[]) || [];
 
   return (
     <>

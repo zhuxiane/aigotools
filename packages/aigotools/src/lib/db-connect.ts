@@ -1,73 +1,38 @@
-import mongoose, { ConnectOptions } from "mongoose";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
 
-import { ensureSiteIndexes } from "../models/site";
-
-import { AppConfig } from "@/lib/config";
 declare global {
-  var mongoose: any;
+  // 为了防止 TypeScript 报错，声明一个全局变量
+  var _db: any;
 }
 
-if (!AppConfig.mongoUri) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
-}
+let db;
 
-let cached = global.mongoose;
+const TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL;
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function dbConnect() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-  if (!cached.promise) {
-    const opts: ConnectOptions = {
-      bufferCommands: false,
-    };
-
-    const connection = mongoose
-      .connect(AppConfig.mongoUri!, opts)
-      .then(async (mongoose) => {
-        // after mongo collect
-        await ensureSiteIndexes();
-
-        return mongoose;
-      });
-
-    cached.promise = connection;
-  }
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+if (process.env.NODE_ENV === "production") {
+  // 生产环境，连接到 Turso 数据库
+  if (!TURSO_DATABASE_URL) {
+    throw new Error("TURSO_DATABASE_URL is not defined");
   }
 
-  // 添加事件监听器
-  mongoose.connection.on("connected", () => {
-    global.console.log("Mongoose connection established.");
+  db = createClient({
+    url: TURSO_DATABASE_URL,
+    authToken: process.env.TURSO_AUTH_TOKEN,
   });
-
-  mongoose.connection.on("error", (err) => {
-    global.console.error("Mongoose connection error:", err);
-  });
-
-  mongoose.connection.on("disconnected", () => {
-    global.console.log("Mongoose connection disconnected.");
-  });
-
-  mongoose.connection.on("reconnected", () => {
-    global.console.log("Mongoose connection reconnected.");
-  });
-
-  mongoose.connection.on("reconnectFailed", () => {
-    global.console.error("Mongoose reconnection failed.");
-  });
-
-  return cached.conn;
+} else {
+  // 开发环境，使用全局变量防止多次创建连接
+  if (!global._db) {
+    if (!TURSO_DATABASE_URL) {
+      throw new Error("TURSO_DATABASE_URL is not defined");
+    }
+    global._db = createClient({
+      url: TURSO_DATABASE_URL,
+    });
+  }
+  db = global._db;
 }
 
-export default dbConnect;
+const drizzleDb = drizzle(db, { logger: true });
+
+export default drizzleDb;

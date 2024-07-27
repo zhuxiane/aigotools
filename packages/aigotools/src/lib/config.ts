@@ -8,7 +8,7 @@ export const AppConfig = {
   // clerk
   debugClerk: process.env.CLERK_DEBUG === "true",
   manageUsers: (process.env.NEXT_PUBLIC_MANAGER_USER?.split(",") || []).filter(
-    Boolean
+    Boolean,
   ),
 
   // mongo
@@ -30,6 +30,7 @@ export const AppConfig = {
   s3Bucket: (process.env.S3_BUCKET as string) || "",
   s3AccessKey: (process.env.S3_ACCESS_KEY_ID as string) || "",
   s3Secert: (process.env.S3_ACCESS_SECERT as string) || "",
+  s3EndPoint: (process.env.S3_ACCESS_SECERT as string) || "",
   // tencent cos
   cosBase: (process.env.COS_BASE as string) || "",
   cosRegion: (process.env.COS_REGION as string) || "",
@@ -45,7 +46,7 @@ export const AppConfig = {
   get crawlerAuthToken() {
     return Buffer.from(
       `${this.crawlerAuthUser}:${this.crawlerAuthPassword}`,
-      "utf8"
+      "utf8",
     ).toString("base64");
   },
 };

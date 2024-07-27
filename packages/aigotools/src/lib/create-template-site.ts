@@ -1,9 +1,9 @@
+import { InsertSite, SelectSite } from "@/db/schema";
+
 import { ProcessStage, SiteState } from "./constants";
 
-import { Site } from "@/models/site";
-
-export const createTemplateSite = (site: Partial<Site> = {}) => {
-  const newSite: Omit<Site, "_id"> = {
+export const createTemplateSite = (site: SelectSite | {} = {}) => {
+  const newSite: InsertSite = {
     userId: "",
     url: "",
     siteKey: "",
@@ -11,25 +11,23 @@ export const createTemplateSite = (site: Partial<Site> = {}) => {
     weight: 0,
     name: "",
     snapshot: "",
-    desceription: "",
+    description: "",
     pricingType: "",
     categories: [],
     images: [],
     features: [],
     usecases: [],
     users: [],
-    relatedSearchs: [],
+    relatedSearches: [],
     pricings: [],
     links: {},
     voteCount: 0,
     metaKeywords: [],
-    metaDesceription: "",
+    metaDescription: "",
     searchSuggestWords: [],
     state: SiteState.unpublished,
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
     processStage: ProcessStage.pending,
   };
 
-  return { newSite, ...site } as Site;
+  return { ...newSite, ...site } as InsertSite;
 };

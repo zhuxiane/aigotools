@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import { Ban, Bone, Check } from "lucide-react";
 
 import { ReviewState } from "@/lib/constants";
-import { Review } from "@/models/review";
+import { SelectReview, InsertReview } from "@/db/schema";
 import OperationIcon from "@/components/common/operation-icon";
 import { updateReviewState } from "@/lib/actions";
 
@@ -19,7 +19,7 @@ export default function ReviewOperation({
   review,
   handleSearch,
 }: {
-  review: Review;
+  review: SelectReview;
   handleSearch: () => void;
 }) {
   const t = useTranslations("reviewManage");
@@ -27,7 +27,7 @@ export default function ReviewOperation({
   const [updating, setUpdating] = useState(false);
 
   const handleUpdateReviewState = useCallback(
-    async (review: Review, state: ReviewState) => {
+    async (review: SelectReview, state: ReviewState) => {
       if (updating) {
         return false;
       }
@@ -35,7 +35,7 @@ export default function ReviewOperation({
       try {
         setUpdating(true);
 
-        await updateReviewState(review._id, state);
+        await updateReviewState(review.id, state);
 
         await handleSearch();
       } catch (error) {

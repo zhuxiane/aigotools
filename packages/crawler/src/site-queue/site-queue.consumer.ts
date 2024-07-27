@@ -1,11 +1,12 @@
 import { InjectQueue, OnQueueFailed, Process, Processor } from '@nestjs/bull';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
+import * as schema from '../db/schema';
+// import { InjectModel } from '@nestjs/mongoose';
 import axios, { AxiosError } from 'axios';
 import { Job, Queue } from 'bull';
 import * as _ from 'lodash';
-import { Model } from 'mongoose';
+// import { Model } from 'mongoose';
 import OpenAI from 'openai';
 import * as sharp from 'sharp';
 import {
@@ -16,30 +17,33 @@ import {
 import { SiteSummaryOutput, SiteSummaryPrompt } from '../prompts/site-summary';
 import { BrowserService } from '../providers/browser.service';
 import { COSService } from '../providers/cos.service';
-import { MinioService } from '../providers/minio.service';
+// import { MinioService } from '../providers/minio.service';
 import { RedisService } from '../providers/redis.service';
 import { S3Service } from '../providers/s3.service';
 import { Category } from '../schemas/category.schema';
-import { ProcessStage, Site, SiteDocument } from '../schemas/site.schema';
 import { SITE_CRAWL_JOB, SITE_QUEUE_NAME } from './site-queue.constant';
+import { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { eq, inArray, sql, or, and, like, ne } from 'drizzle-orm';
+import { SiteState, ProcessStage } from '../lib/constants';
 
 @Processor(SITE_QUEUE_NAME)
 export class SiteConsumer {
   constructor(
-    @InjectModel(Site.name) private siteModel: Model<Site>,
-    @InjectModel(Category.name) private categoryModel: Model<Category>,
+    // @InjectModel(Site.name) private siteModel: Model<Site>,
+    // @InjectModel(Category.name) private categoryModel: Model<Category>,
     @InjectQueue(SITE_QUEUE_NAME) private siteQueue: Queue,
+    @Inject('DB') private db: LibSQLDatabase<typeof schema>,
 
     private browserService: BrowserService,
     private s3Service: S3Service,
     private configService: ConfigService,
     private redisService: RedisService,
-    private minioService: MinioService,
+    // private minioService: MinioService,
     private cosService: COSService,
   ) {}
 
   private async getUrlScreenshot(url: string) {
-    const cacheKey = `aogotools:${encodeURIComponent(url)}:screenshopt`;
+    const cacheKey = `orgai:${encodeURIComponent(url)}:screenshopt`;
     const cache = await this.redisService.redisClient.get(cacheKey);
     if (cache) {
       try {
@@ -76,10 +80,10 @@ export class SiteConsumer {
         contentType,
       );
     } else if (imageStorage === 'minio') {
-      snapshot = await this.minioService.uploadFile(
-        resizedSnapshot,
-        contentType,
-      );
+      // snapshot = await this.minioService.uploadFile(
+      //   resizedSnapshot,
+      //   contentType,
+      // );
     } else if (imageStorage === 'cos') {
       snapshot = await this.cosService.uploadBufferToCOS(
         resizedSnapshot,
@@ -151,7 +155,11 @@ export class SiteConsumer {
     }
   }
 
-  private async summarySiteContent(site: Site) {
+  private async summarySiteContent(site: schema.SelectSite) {
+    return {
+      summaried: '',
+      categories: [],
+    };
     // ai summary
     const content = await this.getUrlContent(site.url);
 
@@ -173,8 +181,14 @@ export class SiteConsumer {
       temperature: 1,
       stream: false,
     });
-    const allCategories = await this.categoryModel.distinct('name', {
-      parent: { $ne: null },
+    // const allCategories = await this.categoryModel.distinct('name', {
+    //   parent: { $ne: null },
+    // });
+    const allCategories = await this.db.query.CategoryTable.findMany({
+      columns: {
+        name: true,
+      },
+      where: ne(schema.CategoryTable.parent, null),
     });
     const categoryTask = openai.chat.completions.create({
       model: this.configService.get('OPENAI_MODEL'),
@@ -184,7 +198,7 @@ export class SiteConsumer {
           role: 'user',
           content: JSON.stringify({
             siteDescription: cleanedMarkdown,
-            categories: allCategories,
+            categories: allCategories.map((item) => item.name),
           } as CategorySummaryInput),
         },
       ],
@@ -234,14 +248,17 @@ export class SiteConsumer {
     name: SITE_CRAWL_JOB,
     concurrency: 10,
   })
-  async crawlSite(job: Job<string>) {
+  async crawlSite(job: Job<number>) {
     const siteId = job.data;
     Logger.log(`process site ${siteId} start`);
 
-    let site: SiteDocument;
+    let site: schema.SelectSite;
 
     try {
-      site = await this.siteModel.findById(siteId);
+      site = await this.db.query.SiteTable.findFirst({
+        where: eq(schema.SiteTable.id, siteId),
+      });
+      // site = await this.siteModel.findById(siteId);
       if (!site) {
         throw new Error('Site not found');
       }
@@ -263,9 +280,17 @@ export class SiteConsumer {
       // transform category to id
       let categoriesIds = [] as string[];
       if (categories.length) {
-        categoriesIds = await this.categoryModel.distinct('_id', {
-          name: categories,
-        });
+        // categoriesIds = await this.categoryModel.distinct('_id', {
+        //   name: categories,
+        // });
+        categoriesIds = (
+          await this.db.query.CategoryTable.findMany({
+            columns: {
+              id: true,
+            },
+            where: inArray(schema.CategoryTable.name, categories),
+          })
+        ).map((item) => item.id.toString());
       } else {
         categoriesIds = site.categories;
       }
@@ -273,7 +298,7 @@ export class SiteConsumer {
       site.snapshot = snapshot;
       site.processStage = ProcessStage.success;
       site.name = _.get(summaried, 'name', site.name);
-      site.desceription = _.get(summaried, 'introduction', site.desceription);
+      site.description = _.get(summaried, 'introduction', site.description);
       site.users = _.get(summaried, 'users', site.users);
       site.features = _.get(summaried, 'features', site.features);
       site.categories = categoriesIds;
@@ -310,14 +335,18 @@ export class SiteConsumer {
     } finally {
       await this.assertJobActive(job);
       if (site) {
-        site.updatedAt = Date.now();
-        await site?.save();
+        site.updatedAt = new Date().toISOString();
+        await this.db
+          .update(schema.SiteTable)
+          .set(site)
+          .where(eq(schema.SiteTable.id, siteId));
+        // await site?.save();
       }
     }
   }
 
   @OnQueueFailed({ name: SITE_CRAWL_JOB })
-  async handleSunoDispatchLyricJobFailed(job: Job<string>) {
+  async handleSunoDispatchLyricJobFailed(job: Job<number>) {
     if (
       job.attemptsMade &&
       job.opts.attempts &&
@@ -329,11 +358,18 @@ export class SiteConsumer {
     Logger.error(
       `${SITE_CRAWL_JOB} for ${siteId} failed after ${job.attemptsMade} attempts`,
     );
-    await this.siteModel.findByIdAndUpdate(siteId, {
-      $set: {
-        updatedAt: Date.now(),
+    await this.db
+      .update(schema.SiteTable)
+      .set({
+        updatedAt: new Date().toISOString(),
         processStage: ProcessStage.fail,
-      },
-    });
+      })
+      .where(eq(schema.SiteTable.id, siteId));
+    // await this.siteModel.findByIdAndUpdate(siteId, {
+    //   $set: {
+    //     updatedAt: Date.now(),
+    //     processStage: ProcessStage.fail,
+    //   },
+    // });
   }
 }

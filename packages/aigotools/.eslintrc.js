@@ -7,9 +7,9 @@ module.exports = {
   extends: [
     "next/core-web-vitals",
     "plugin:react/recommended",
-    "plugin:prettier/recommended",
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
+    "plugin:prettier/recommended",
   ],
   plugins: [
     "react",
@@ -92,6 +92,12 @@ module.exports = {
         blankLine: "any",
         prev: ["const", "let", "var"],
         next: ["const", "let", "var"],
+      },
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        endOfLine: "auto",
       },
     ],
   },

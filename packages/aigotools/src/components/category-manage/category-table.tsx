@@ -21,23 +21,25 @@ import { debounce } from "lodash";
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
-import CategoryEdit from "./category-edit";
-import CategoryOperation from "./category-operation";
-
 import { CategorySearchForm, managerSearchCategories } from "@/lib/actions";
 import Loading from "@/components/common/loading";
 import EmptyImage from "@/components/search/empty-image";
-import { Category } from "@/models/category";
+import { SelectCategory, InsertCategory } from "@/db/schema";
 import { createTemplateCategory } from "@/lib/create-template-category";
+
+import CategoryOperation from "./category-operation";
+import CategoryEdit from "./category-edit";
 
 export default function CategoryTable() {
   const t = useTranslations("categoryManage");
   const [searchResult, setSearchResult] = useState({
-    categories: [] as Category[],
+    categories: [] as SelectCategory[],
     count: 0,
     totalPage: 0,
   });
-  const [category, setCategory] = useState<Category | undefined>(undefined);
+  const [category, setCategory] = useState<InsertCategory | undefined>(
+    undefined,
+  );
 
   const [loading, setIsLoading] = useState(false);
   const [searchParams, setSearchParams] = useState<CategorySearchForm>({
@@ -83,15 +85,16 @@ export default function CategoryTable() {
   });
 
   const topCategoryNameMap = useMemo(() => {
-    return allTopCategories.reduce((t, c) => {
-      return {
-        ...t,
-        [c._id]: c.name,
-      };
-    }, {} as Record<string, string>);
+    return allTopCategories.reduce(
+      (t, c) => {
+        return {
+          ...t,
+          [c.id]: c.name,
+        };
+      },
+      {} as Record<string, string>,
+    );
   }, [allTopCategories]);
-
-  console.log(topCategoryNameMap);
 
   return (
     <div className="mt-4 relative py-4">
@@ -136,9 +139,7 @@ export default function CategoryTable() {
             }
           >
             {allTopCategories.map((category) => {
-              return (
-                <SelectItem key={category._id}>{category.name}</SelectItem>
-              );
+              return <SelectItem key={category.id}>{category.name}</SelectItem>;
             })}
           </Select>
         )}
@@ -156,7 +157,7 @@ export default function CategoryTable() {
             1000,
             {
               maxWait: 5000,
-            }
+            },
           )}
         />
       </div>
@@ -178,7 +179,7 @@ export default function CategoryTable() {
             }
           >
             {searchResult.categories.map((category) => (
-              <TableRow key={category._id}>
+              <TableRow key={category.id}>
                 <TableCell>
                   {category.icon}
                   {category.name}
