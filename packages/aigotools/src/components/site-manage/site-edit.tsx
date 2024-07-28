@@ -100,9 +100,7 @@ export default function SiteEdit({
       }}
     >
       <ModalContent>
-        <ModalHeader>
-          {site?.id ? t("updateTitle") : t("newTitle")}
-        </ModalHeader>
+        <ModalHeader>{site?.id ? t("updateTitle") : t("newTitle")}</ModalHeader>
         <ModalBody>
           <form className="grid grid-cols-2 gap-4 max-h-[65vh] pb-1 overflow-auto">
             <Input

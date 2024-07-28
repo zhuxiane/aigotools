@@ -15,7 +15,7 @@ const minioClient = new Client({
 
 export async function uploadBufferToMinio(
   buffer: Buffer,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
   const exists = await minioClient.bucketExists(AppConfig.minioBucket);
 
@@ -35,7 +35,7 @@ export async function uploadBufferToMinio(
       buffer.length,
       {
         "Content-Type": contentType,
-      }
+      },
     );
 
     return `${AppConfig.minioBase}/${AppConfig.minioBucket}/${fileKey}`;
@@ -55,7 +55,7 @@ export async function uploadFormDataToMinio(formData: FormData) {
         .toBuffer();
 
       return uploadBufferToMinio(buffer, "image/webp");
-    })
+    }),
   );
 
   return uploadRes;

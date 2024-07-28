@@ -19,7 +19,7 @@ export default function CategoryTag({
         className,
         {
           "!bg-blue-700": active,
-        }
+        },
       )}
       onClick={onClick}
     >

@@ -50,7 +50,7 @@ export default function ImageUpload({
           onChange(res[0]);
         } else {
           throw new Error(
-            `Unsuppored image storage: ${AppConfig.imageStorage}`
+            `Unsuppored image storage: ${AppConfig.imageStorage}`,
           );
         }
       } catch (error) {
@@ -60,7 +60,7 @@ export default function ImageUpload({
         setUploading(false);
       }
     },
-    [onChange, t, uploading]
+    [onChange, t, uploading],
   );
 
   return value ? (

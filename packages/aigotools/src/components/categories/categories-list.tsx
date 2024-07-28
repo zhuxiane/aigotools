@@ -33,7 +33,7 @@ export default function CategoriesList() {
                       key={item.id}
                       onClick={() => {
                         const url = `/search?c=${encodeURIComponent(
-                          item.name
+                          item.name,
                         )}`;
 
                         router.push(url);

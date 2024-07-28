@@ -11,7 +11,7 @@ const cos = new COS({
 
 export async function uploadBufferToCos(
   buffer: Buffer,
-  contentType: string
+  contentType: string,
 ): Promise<string> {
   const subfix = contentType.split("/").pop();
   const fileKey = subfix ? `${v4()}.${subfix}` : v4();
@@ -39,7 +39,7 @@ export async function uploadFormDataToCos(formData: FormData) {
       const buffer = Buffer.from(await file.arrayBuffer());
 
       return uploadBufferToCos(buffer, file.type);
-    })
+    }),
   );
 
   return uploadRes;
