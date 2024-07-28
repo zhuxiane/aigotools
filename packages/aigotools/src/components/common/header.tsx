@@ -46,14 +46,11 @@ export default function Header({ className }: { className?: string }) {
     <Container
       className={clsx(
         "flex items-center justify-between h-20 sm:h-24",
-        className
+        className,
       )}
     >
       <Logo />
       <div className="flex items-center gap-2 sm:gap-4">
-        <Link href={"https://github.com/someu/aigotools"} target="_blank">
-          <Github className="text-primary cursor-pointer" size={16} />
-        </Link>
         <LanguageSwitcher />
         <ThemeSwitcher />
         <SignedOut>

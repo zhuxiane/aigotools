@@ -22,7 +22,7 @@ export class AppService {
     // @InjectModel(Site.name) private siteModel: Model<Site>,
     @Inject('DB') private db: LibSQLDatabase<typeof schema>,
     // @Inject('DB_PROD') private drizzleProd: LibSQLDatabase<typeof schema>,
-    private readonly siteQueueProducer: SiteQueueProducer,
+    // private readonly siteQueueProducer: SiteQueueProducer,
   ) {}
 
   private generateBatchQuery(params: BatchParams) {
@@ -66,19 +66,19 @@ export class AppService {
     // return query;
   }
 
-  async batchDispatchSiteCrawl(params: BatchParams) {
-    const conditions = this.generateBatchQuery(params);
-    console.log(params);
-    const siteIds = await this.db.query.SiteTable.findMany({
-      columns: {
-        id: true,
-      },
-      where: conditions,
-    });
-    console.log(siteIds);
-    await this.siteQueueProducer.batchAddCrawlJobs(
-      siteIds.map((item) => item.id),
-    );
+  // async batchDispatchSiteCrawl(params: BatchParams) {
+  //   const conditions = this.generateBatchQuery(params);
+  //   console.log(params);
+  //   const siteIds = await this.db.query.SiteTable.findMany({
+  //     columns: {
+  //       id: true,
+  //     },
+  //     where: conditions,
+  //   });
+  //   console.log(siteIds);
+  //   await this.siteQueueProducer.batchAddCrawlJobs(
+  //     siteIds.map((item) => item.id),
+  //   );
 
     // const query = this.generateBatchQuery(params);
 
@@ -91,7 +91,7 @@ export class AppService {
     // await this.siteModel.updateMany(query, {
     //   $set: { processStage: ProcessStage.processing },
     // });
-  }
+  // }
 
   async test() {
     Logger.log('test!!');
@@ -99,7 +99,7 @@ export class AppService {
     Logger.log(sites);
   }
 
-  async batchStopSiteCrawl(params: BatchParams) {
+  // async batchStopSiteCrawl(params: BatchParams) {
     // const query = this.generateBatchQuery(params);
     // const siteIds = (await this.siteModel.distinct('_id', query)).map((id) =>
     //   id.toString(),
@@ -109,5 +109,5 @@ export class AppService {
     // await this.siteModel.updateMany(query, {
     //   $set: { processStage: ProcessStage.pending },
     // });
-  }
+  // }
 }

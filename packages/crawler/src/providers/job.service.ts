@@ -1,5 +1,6 @@
-import { InjectQueue, OnQueueFailed, Process, Processor } from '@nestjs/bull';
-import { Logger, Inject } from '@nestjs/common';
+// jobs.service.ts
+import { Injectable, Inject, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import * as schema from '../db/schema';
 // import { InjectModel } from '@nestjs/mongoose';
@@ -21,26 +22,44 @@ import { COSService } from '../providers/cos.service';
 import { RedisService } from '../providers/redis.service';
 import { S3Service } from '../providers/s3.service';
 import { Category } from '../schemas/category.schema';
-import { SITE_CRAWL_JOB, SITE_QUEUE_NAME } from './site-queue.constant';
+import { SITE_CRAWL_JOB, SITE_QUEUE_NAME } from '../site-queue/site-queue.constant';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { eq, inArray, sql, or, and, like, ne } from 'drizzle-orm';
 import { SiteState, ProcessStage } from '../lib/constants';
 
-@Processor(SITE_QUEUE_NAME)
-export class SiteConsumer {
+@Injectable()
+export class JobsService {
+  private readonly logger = new Logger(JobsService.name);
+
   constructor(
-    // @InjectModel(Site.name) private siteModel: Model<Site>,
-    // @InjectModel(Category.name) private categoryModel: Model<Category>,
-    @InjectQueue(SITE_QUEUE_NAME) private siteQueue: Queue,
+    private readonly redisService: RedisService,
     @Inject('DB') private db: LibSQLDatabase<typeof schema>,
 
     private browserService: BrowserService,
     private s3Service: S3Service,
     private configService: ConfigService,
-    private redisService: RedisService,
-    // private minioService: MinioService,
-    private cosService: COSService,
-  ) { }
+  ) {}
+
+  @Cron('*/1 * * * *') // 每分钟执行一次
+  async handleCron() {
+    this.logger.debug('Looking for jobs in the queue...');
+
+    const jobs = await this.redisService.getJobs(10);
+    if (jobs.length > 0) {
+      this.logger.log(`Processing ${jobs.length} jobs`);
+      await Promise.all(jobs.map((job) => this.processJob(job)));
+    } else {
+      this.logger.log('No jobs found in the queue.');
+    }
+  }
+
+  private async processJob(job: string) {
+    this.logger.log(`Processing job: ${job}`);
+    // 在这里处理你的作业
+    // 模拟处理时间
+    await this.crawlSite(Number(job));
+    this.logger.log(`Job completed: ${job}`);
+  }
 
   private async getUrlScreenshot(url: string) {
     const cacheKey = `orgai:${encodeURIComponent(url)}:screenshopt`;
@@ -76,16 +95,6 @@ export class SiteConsumer {
     let snapshot = '';
     if (imageStorage === 's3') {
       snapshot = await this.s3Service.uploadBufferToS3(
-        resizedSnapshot,
-        contentType,
-      );
-    } else if (imageStorage === 'minio') {
-      // snapshot = await this.minioService.uploadFile(
-      //   resizedSnapshot,
-      //   contentType,
-      // );
-    } else if (imageStorage === 'cos') {
-      snapshot = await this.cosService.uploadBufferToCOS(
         resizedSnapshot,
         contentType,
       );
@@ -145,14 +154,6 @@ export class SiteConsumer {
     const content = siteContentRes.data.data.content;
     await this.redisService.redisClient.setex(cacheKey, 600, content);
     return content;
-  }
-
-  private async assertJobActive(job: Job) {
-    const currentJob = await this.siteQueue.getJob(job.id);
-    if (!currentJob.isActive()) {
-      Logger.error(`Job ${job.id} is not active`);
-      throw new Error(`Job ${job.id} is not active`);
-    }
   }
 
   private async summarySiteContent(site: schema.SelectSite) {
@@ -244,12 +245,7 @@ export class SiteConsumer {
     // return { summaried, categories };
   }
 
-  @Process({
-    name: SITE_CRAWL_JOB,
-    concurrency: 10,
-  })
-  async crawlSite(job: Job<number>) {
-    const siteId = job.data;
+  async crawlSite(siteId: number) {
     Logger.log(`process site ${siteId} start`);
 
     let site: schema.SelectSite;
@@ -330,33 +326,23 @@ export class SiteConsumer {
         );
       } else {
         Logger.error(`process site ${siteId} error`, error);
+        this.handleSunoDispatchLyricJobFailed(siteId);
       }
       throw error;
     } finally {
-      await this.assertJobActive(job);
       if (site) {
         site.updatedAt = new Date().toISOString();
         await this.db
           .update(schema.SiteTable)
           .set(site)
           .where(eq(schema.SiteTable.id, siteId));
-        // await site?.save();
       }
     }
   }
 
-  @OnQueueFailed({ name: SITE_CRAWL_JOB })
-  async handleSunoDispatchLyricJobFailed(job: Job<number>) {
-    if (
-      job.attemptsMade &&
-      job.opts.attempts &&
-      job.attemptsMade < job.opts.attempts
-    ) {
-      return;
-    }
-    const siteId = job.data;
+  async handleSunoDispatchLyricJobFailed(siteId: number) {
     Logger.error(
-      `${SITE_CRAWL_JOB} for ${siteId} failed after ${job.attemptsMade} attempts`,
+      `${SITE_CRAWL_JOB} for ${siteId} failed`,
     );
     await this.db
       .update(schema.SiteTable)
@@ -365,11 +351,5 @@ export class SiteConsumer {
         processStage: ProcessStage.fail,
       })
       .where(eq(schema.SiteTable.id, siteId));
-    // await this.siteModel.findByIdAndUpdate(siteId, {
-    //   $set: {
-    //     updatedAt: Date.now(),
-    //     processStage: ProcessStage.fail,
-    //   },
-    // });
   }
 }

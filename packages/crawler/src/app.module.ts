@@ -1,5 +1,6 @@
 import { ExpressAdapter } from '@bull-board/express';
 import { BullBoardModule } from '@bull-board/nestjs';
+import { ScheduleModule } from '@nestjs/schedule';
 import { BullModule } from '@nestjs/bull';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,12 +14,17 @@ import { SiteQueueModule } from './site-queue/site-queue.module';
 // import { MinioService } from './providers/minio.service';
 import * as schema from './db/schema';
 import { DrizzleTursoModule } from '@knaadh/nestjs-drizzle-turso';
+import { JobsService } from './providers/job.service';
+import { RedisService } from './providers/redis.service';
+import { BrowserService } from './providers/browser.service';
+import { S3Service } from './providers/s3.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env.local', '.env.prod', '.env.dev', '.env'],
     }),
+    ScheduleModule.forRoot(),
     DrizzleTursoModule.registerAsync({
       tag: 'DB',
       useFactory(configService: ConfigService) {
@@ -77,7 +83,7 @@ import { DrizzleTursoModule } from '@knaadh/nestjs-drizzle-turso';
       },
       imports: [ConfigModule],
     }),
-    SiteQueueModule,
+    // SiteQueueModule,
     ThrottlerModule.forRoot([
       {
         ttl: 1 * 1000,
@@ -97,6 +103,10 @@ import { DrizzleTursoModule } from '@knaadh/nestjs-drizzle-turso';
   providers: [
     AppService,
     ConfigService,
+    JobsService,
+    RedisService,
+    BrowserService,
+    S3Service,
     // MinioService
   ],
 })

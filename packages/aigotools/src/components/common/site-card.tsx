@@ -44,7 +44,7 @@ export default function SiteCard({ site }: { site: SelectSite }) {
             <span className="text-sm">{site.voteCount}</span>
           </div>
         </div>
-        <div className="mt-2 text-primary-400 text-sm overflow-hidden text-ellipsis line-clamp-2">
+        <div className="mt-2 text-primary-400 text-sm overflow-hidden text-ellipsis line-clamp-2 min-h-[1rem]">
           {site.description}
         </div>
         <div className="mt-4 flex items-center justify-between gap-4">

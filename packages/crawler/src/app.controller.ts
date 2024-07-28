@@ -18,13 +18,13 @@ export class AppController {
 
   @Post('dispatch')
   async batchDispatchSites(@Body() body: BatchParams) {
-    const count = await this.appService.batchDispatchSiteCrawl(body);
-    return count;
+    // const count = await this.appService.batchDispatchSiteCrawl(body);
+    // return count;
   }
 
   @Post('stop')
   async batchStopSites(@Body() body: BatchParams) {
-    const count = await this.appService.batchStopSiteCrawl(body);
-    return count;
+    // const count = await this.appService.batchStopSiteCrawl(body);
+    // return count;
   }
 }

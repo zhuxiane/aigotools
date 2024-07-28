@@ -2,11 +2,9 @@
   "editor.fontSize": 16,
   "window.zoomLevel": 1,
   "editor.formatOnType": true,
-  "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "editor.formatOnPaste": true,
   "editor.guides.bracketPairs": "active",
-  "files.autoSave": "afterDelay",
   "git.confirmSync": false,
   "workbench.startupEditor": "newUntitledFile",
   "editor.suggestSelection": "first",
@@ -20,8 +18,35 @@
   "files.associations": {
     "editor.snippetSuggestions": "top"
   },
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit"
-  },
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode",
+      "editor.formatOnSave": true
+    },
+    "editor.formatOnSave": false,
+    "github.copilot.enable": {
+      "*": false,
+      "plaintext": true,
+      "markdown": false,
+      "scminput": false
+    },
+    "extensions.ignoreRecommendations": true,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "prisma.showPrismaDataPlatformNotification": false,
+    "prettier.trailingComma": "all",
+    "prettier.endOfLine": "auto",
+    "prettier.useEditorConfig": false,
+    "prettier.enableDebugLogs": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "always"
+    }
 }

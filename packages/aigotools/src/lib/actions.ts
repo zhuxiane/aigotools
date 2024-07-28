@@ -132,11 +132,12 @@ export async function searchSites({
       .get();
 
     const [sites, countResult] = await Promise.all([baseFindTask, countTask]);
+    const categories = await getFeaturedCategories();
 
     return {
       page,
       // sites: [...(page === 1 ? regFindSites : []), ...sites],
-      sites,
+      sites: sites.map((site) => pickCategoryName(site, categories)),
       hasNext: countResult?.count || 0 > page * pageSize,
     };
   } catch (error) {

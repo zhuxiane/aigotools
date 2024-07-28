@@ -13,7 +13,7 @@ export default function NavBar({ name }: { name: string | string[] }) {
         </Link>
       </BreadcrumbItem>
       {(Array.isArray(name) ? name : [name]).map((n, i) => (
-        <BreadcrumbItem key={i}>{n}</BreadcrumbItem>
+        <BreadcrumbItem key={n}>{n}</BreadcrumbItem>
       ))}
     </Breadcrumbs>
   );

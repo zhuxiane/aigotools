@@ -6,7 +6,7 @@
     "dashboard": "Dashboard"
   },
   "footer": {
-    "slogan": "Search 10000+ Useful AI Tools By What You Need",
+    "slogan": "Discover the Best AI Tools for Your Needs",
     "submitATool": "Submit a Tool",
     "aboutUs": "About Us",
     "contactUs": "Contact Us",
@@ -24,7 +24,7 @@
     "categoryManage": "Category Manage"
   },
   "index": {
-    "slogan": "Search 10000+ Useful AI Tools By What You Need",
+    "slogan": "Discover the Best AI Tools for Your Needs",
     "featured": "Featured",
     "latest": "Latest",
     "searchPlaceholder": "i want to write an article...",
@@ -32,9 +32,9 @@
     "more": "More +"
   },
   "metadata": {
-    "title": "OrgAi.net",
-    "description": "AigoTools is a leading AI tools directory and search engine. AigoTools helps you discover the best AI tools,apps and services list and takes your personal and business productivity to the next level.",
-    "keywords": "Open source AI tools directory,AI tools directory, AI tool list, AI tools search engine, artificial inteligence applications,top ai tools, best ai tools directory, best ai tools, ai tools list"
+    "title": "Discover the Best AI Tools | OrgAi.net",
+    "description": "OrgAi is your premier AI tool directory, dedicated to helping you discover the latest and most effective AI tools tailored to your needs.",
+    "keywords": "AI tools, AI tool directory, AI software, AI analytics tools, AI automation tools, AI creative tools, latest AI tools, best AI tools, AI tool finder, AI tool navigator"
   },
   "site": {
     "categories": "Categories",
@@ -54,20 +54,20 @@
     "relatedSearchs": "Related Searchs"
   },
   "search": {
-    "metadata": { "title": "Search AI tools" },
+    "metadata": { "title": "Search Best AI tools" },
     "result": "Search Result",
     "empty": "Oppos,no result...",
     "loadMore": "Load More",
     "loadFailed": "Load Failed"
   },
   "submit": {
-    "metadata": { "title": "Submit yout AI Tool" },
-    "title": "Submit yout AI Tool",
+    "metadata": { "title": "Submit your AI Tool & Website" },
+    "title": "Submit your AI Tool & Website",
     "subTitle": "Submit your website in one minute",
     "websiteName": "Website Name",
-    "websiteNamePlaceholder": "AigoTools",
+    "websiteNamePlaceholder": "OrgAi",
     "websiteUrl": "Website Url",
-    "websiteUrlPlaceholder": "https://aigotools.com",
+    "websiteUrlPlaceholder": "https://orgai.net",
     "submit": "Submit",
     "requireName": "Name is requireed",
     "requireUrl": "Url is requireed",

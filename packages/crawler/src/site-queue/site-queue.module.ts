@@ -12,7 +12,7 @@ import { BrowserService } from '../providers/browser.service';
 import { S3Service } from '../providers/s3.service';
 import { ConfigService } from '@nestjs/config';
 import { Category, CategorySchema } from '../schemas/category.schema';
-import { RedisService } from '../providers/redis.service';
+// import { RedisService } from '../providers/redis.service';
 // import { MinioService } from '../providers/minio.service';
 import { COSService } from '../providers/cos.service';
 
@@ -36,7 +36,7 @@ import { COSService } from '../providers/cos.service';
     BrowserService,
     S3Service,
     ConfigService,
-    RedisService,
+    // RedisService,
     // MinioService,
     COSService,
   ],
