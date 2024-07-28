@@ -40,13 +40,15 @@ export const AppConfig = {
 
   // crawer
   crawlerGateway: (process.env.CRAWLER_GATEWAY as string) || "",
-  crawlerAuthUser: (process.env.CRAWLER_AUTH_USER as string) || "",
-  crawlerAuthPassword: (process.env.CRAWLER_AUTH_PASSWORD as string) || "",
+  crawlerApiKey: (process.env.CRAWLER_API_KEY as string) || "",
+  // crawlerAuthUser: (process.env.CRAWLER_AUTH_USER as string) || "",
+  // crawlerAuthPassword: (process.env.CRAWLER_AUTH_PASSWORD as string) || "",
 
   get crawlerAuthToken() {
-    return Buffer.from(
-      `${this.crawlerAuthUser}:${this.crawlerAuthPassword}`,
-      "utf8",
-    ).toString("base64");
+    // return Buffer.from(
+    //   `${this.crawlerAuthUser}:${this.crawlerAuthPassword}`,
+    //   "utf8",
+    // ).toString("base64");
+    return this.crawlerApiKey;
   },
 };

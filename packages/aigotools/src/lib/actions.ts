@@ -826,7 +826,7 @@ export async function dispatchSiteCrawl(siteId: number) {
       { siteIds: [siteId] },
       {
         headers: {
-          Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
+          Authorization: `${AppConfig.crawlerAuthToken}`,
         },
       },
     );
@@ -845,7 +845,7 @@ export async function stopSiteCrawl(siteId: number) {
       { siteIds: [siteId] },
       {
         headers: {
-          Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
+          Authorization: `${AppConfig.crawlerAuthToken}`,
         },
       },
     );
@@ -866,7 +866,7 @@ export async function dispatchAllSitesCrawl(
       { query: data },
       {
         headers: {
-          Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
+          Authorization: `${AppConfig.crawlerAuthToken}`,
         },
       },
     );
@@ -887,7 +887,7 @@ export async function stopAllSitesCrawl(
       { query: data },
       {
         headers: {
-          Authorization: `Basic ${AppConfig.crawlerAuthToken}`,
+          Authorization: `${AppConfig.crawlerAuthToken}`,
         },
       },
     );

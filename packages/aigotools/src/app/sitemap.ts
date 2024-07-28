@@ -1,7 +1,30 @@
 import { MetadataRoute } from "next";
 
-import dbConnect from "@/lib/db-connect";
-import { SiteModel } from "@/models/site";
+import db from "@/lib/db-connect";
+import {
+  SelectSite,
+  InsertSite,
+  InsertCategory,
+  SiteTable,
+  CategoryTable,
+  Link,
+  ReviewTable,
+  UpvoteTable,
+  SelectCategory,
+} from "@/db/schema";
+import {
+  and,
+  eq,
+  ne,
+  or,
+  isNotNull,
+  isNull,
+  desc,
+  asc,
+  like,
+  inArray,
+} from "drizzle-orm/expressions";
+import { sql, count } from "drizzle-orm";
 import { SiteState } from "@/lib/constants";
 import { AvailableLocales } from "@/lib/locales";
 import { AppConfig } from "@/lib/config";
@@ -9,12 +32,12 @@ import { AppConfig } from "@/lib/config";
 const perSitemapCount = 2000;
 
 export async function generateSitemaps() {
-  await dbConnect();
-
-  const siteCount = await SiteModel.countDocuments({
-    state: SiteState.published,
-  });
-
+  const siteCountResult = await db
+    .select({ count: count() })
+    .from(SiteTable)
+    .where(eq(SiteTable.state, SiteState.published))
+    .get();
+  const siteCount = siteCountResult?.count || 0;
   const siteMapCount = Math.ceil(siteCount / perSitemapCount);
 
   const siteMapIds = new Array(siteMapCount).fill(0).map((_, id) => {
@@ -55,25 +78,16 @@ export default async function sitemap({ id }: { id: number }) {
         lastModified: new Date(),
         changeFrequency: "monthly",
         priority: 0.5,
-      }
+      },
     );
   } else {
-    // sites page site map
-    await dbConnect();
-
-    const siteKeyObjs = await SiteModel.find(
-      {
-        state: SiteState.published,
-      },
-
-      {
-        _id: 0,
-        siteKey: 1,
-      }
-    )
-      .skip(id * perSitemapCount)
+    // sites page site map'
+    const siteKeyObjs = await db
+      .select({ siteKey: SiteTable.siteKey })
+      .from(SiteTable)
+      .where(eq(SiteTable.state, SiteState.published))
       .limit(perSitemapCount)
-      .lean();
+      .offset(id * perSitemapCount);
 
     sitemapRoutes.push(
       ...siteKeyObjs.map(({ siteKey }) => {
@@ -83,7 +97,7 @@ export default async function sitemap({ id }: { id: number }) {
           changeFrequency: "monthly" as const,
           priority: 0.9,
         };
-      })
+      }),
     );
   }
 
@@ -93,7 +107,7 @@ export default async function sitemap({ id }: { id: number }) {
         ...route,
         url: [AppConfig.siteUrl, locale, route.url].filter(Boolean).join("/"),
       };
-    })
+    }),
   );
 
   return sitemapData;
