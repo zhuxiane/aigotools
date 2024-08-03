@@ -79,6 +79,18 @@ export default async function sitemap({ id }: { id: number }) {
         changeFrequency: "monthly",
         priority: 0.5,
       },
+      {
+        url: "tos",
+        lastModified: new Date(),
+        changeFrequency: "yearly",
+        priority: 0.5,
+      },
+      {
+        url: "privacy-policy",
+        lastModified: new Date(),
+        changeFrequency: "yearly",
+        priority: 0.5,
+      },
     );
   } else {
     // sites page site map'
