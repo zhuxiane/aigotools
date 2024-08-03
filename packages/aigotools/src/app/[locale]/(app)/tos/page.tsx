@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { useTranslations } from "next-intl";
 
 // CHATGPT PROMPT TO GENERATE YOUR TERMS & SERVICES — replace with your own data 👇
 
@@ -40,7 +39,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function () {
+export default async function Tos() {
   const t = await getTranslations("tos");
   const title = t("title");
   const date = t("date");
