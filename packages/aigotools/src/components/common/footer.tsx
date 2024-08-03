@@ -35,6 +35,8 @@ export default function Footer({ className }: { className?: string }) {
             <Link href={"/#featured"}>{t("featured")}</Link>
             <Link href={"/#latest"}>{t("latestSubmit")}</Link>
             <Link href={"/submit"}>{t("submitATool")}</Link>
+            <Link href={"/tos"}>{t("tos")}</Link>
+            <Link href={"/privacy-policy"}>{t("privacyPolicy")}</Link>
           </div>
         </div>
       </div>

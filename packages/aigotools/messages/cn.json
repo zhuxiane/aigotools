@@ -13,7 +13,9 @@
     "privacy": "隐私政策",
     "latestSubmit": "最新提交",
     "featured": "推荐",
-    "blogs": "博客"
+    "blogs": "博客",
+    "tos": "服务条款",
+    "privacyPolicy": "隐私政策"
   },
   "upload": {
     "uploadFailed": "上传文件失败"
@@ -191,5 +193,48 @@
   "categories": {
     "metadata": { "title": "分类" },
     "loadFailed": "加载失败"
+  },
+  "tos": {
+    "metadata": { "title": "Terms of Service" },
+    "title": "服务条款",
+    "date": "生效日期：2024年8月3日",
+    "welcome": "欢迎访问OrgAI.net。通过访问或使用我们的网站，您同意遵守以下条款和条件。",
+    "acceptanceTitle": "1. 接受条款",
+    "acceptanceText": "使用OrgAI.net，即表示您同意受这些服务条款的约束。如果您不同意，请勿使用我们的网站。",
+    "descriptionTitle": "2. 服务描述",
+    "descriptionText": "OrgAI.net是您首选的AI工具目录，致力于帮助您发现最新和最有效的AI工具，以满足您的需求。",
+    "ownershipTitle": "3. 所有权",
+    "ownershipText": "OrgAI.net及其内容归OrgAI.net所有。版权所有。",
+    "dataCollectionTitle": "4. 用户数据收集",
+    "dataCollectionText": "我们收集以下个人信息：姓名、电子邮件和付款信息。此外，我们通过网络cookie收集非个人数据。更多详情请参阅我们的隐私政策：https://orgai.net/en/privacy-policy。",
+    "userObligationsTitle": "5. 用户义务",
+    "userObligationsText": "用户同意不滥用本网站，包括但不限于： - 从事非法活动。 - 上传有害或恶意内容。 - 侵犯他人权利。",
+    "changesTitle": "6. 条款变更",
+    "changesText": "我们可能会不时更新这些服务条款。用户将通过电子邮件收到任何更改的通知。",
+    "governingLawTitle": "7. 适用法律",
+    "governingLawText": "这些服务条款受美国法律管辖并依其解释。",
+    "contactTitle": "8. 联系方式",
+    "contactText": "如有任何问题或疑虑，请通过support@orgai.net联系我们。",
+    "thankYou": "感谢您使用OrgAI.net。"
+  },
+  "privacyPolicy": {
+    "metadata": { "title": "隐私政策" },
+    "title": "隐私政策",
+    "date": "生效日期：2024年8月3日",
+    "introduction": "欢迎访问OrgAi.net。本隐私政策描述了我们在您访问我们的网站时如何收集、使用和保护您的信息。",
+    "description": "OrgAi是您首选的AI工具目录，致力于帮助您发现最新和最有效的AI工具，以满足您的需求。",
+    "dataCollectionTitle": "1. 数据收集",
+    "dataCollectionText": "我们收集以下用户数据：姓名、电子邮件和付款信息。此外，我们通过网络cookie收集非个人数据。",
+    "purposeTitle": "2. 数据收集的目的",
+    "purposeText": "收集的数据用于订单处理。",
+    "dataSharingTitle": "3. 数据共享",
+    "dataSharingText": "我们不会与任何其他方共享您的数据。",
+    "childrenPrivacyTitle": "4. 儿童隐私",
+    "childrenPrivacyText": "我们不会收集任何儿童的数据。",
+    "updatesTitle": "5. 隐私政策更新",
+    "updatesText": "我们可能会不时更新本隐私政策。用户将通过电子邮件收到任何更改的通知。",
+    "contactTitle": "6. 联系信息",
+    "contactText": "如果您有任何问题或疑虑，请通过support@orgai.net联系我们。",
+    "thankYou": "感谢您使用OrgAi.net。"
   }
 }
